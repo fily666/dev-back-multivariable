@@ -74,11 +74,20 @@ export class AuthService implements OnModuleInit {
 
   /** Opciones de la cookie de sesión. `httpOnly` para que JavaScript no pueda leerla. */
   cookieOptions(): CookieOptions {
-    const isProduction = this.config.get<string>('NODE_ENV') === 'production';
+    // `VERCEL` además de NODE_ENV: cualquier despliegue sirve solo por HTTPS, y basta con
+    // que alguien deje NODE_ENV=development entre las variables del proyecto para que la
+    // cookie de sesión del admin salga sin `Secure` y viaje en claro. La bandera no debe
+    // depender de una variable que se copia a mano.
+    const isDeployed =
+      this.config.get<string>('NODE_ENV') === 'production' ||
+      this.config.get<string>('VERCEL') === '1';
     const domain = this.config.get<string>('COOKIE_DOMAIN');
     return {
       httpOnly: true,
-      secure: isProduction,
+      secure: isDeployed,
+      // 'lax' y no 'none': el navegador nunca llama a esta API desde otro sitio. El front
+      // la expone bajo su propio dominio con el rewrite de `next.config.ts`, así que la
+      // cookie es first-party y 'lax' la protege de CSRF sin estorbar.
       sameSite: 'lax',
       path: '/',
       ...(domain ? { domain } : {}),

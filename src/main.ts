@@ -48,4 +48,11 @@ async function bootstrap() {
   );
 }
 
-void bootstrap();
+// `api/index.ts` importa `configureApp` y `API_PREFIX` de este módulo, y ese import ejecuta
+// el cuerpo del archivo. Sin esta guarda, cada instancia fría en Vercel levantaba una
+// SEGUNDA app de Nest y llamaba a `listen()` dentro del lambda: doble arranque de módulos y
+// un segundo pool de Prisma contra el pooler, sumados a la latencia del primer request.
+// Fuera de Vercel (`npm run start:dev`, `start:prod`) nada cambia.
+if (!process.env.VERCEL) {
+  void bootstrap();
+}
