@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  // NestJS compila a CommonJS; sin esto el cliente generado emite `import.meta`,
+  // que Jest no puede parsear al correr en CJS.
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum QuestionType {
+  SINGLE
+  MULTI
+  SCALE_0_10
+  TEXT
+  MATRIX_AREA
+}
+
+enum ResponseStatus {
+  DRAFT
+  COMPLETED
+}
+
+/// De dónde salen las opciones de una pregunta. Las preguntas que el PDF marca como
+/// "(Lista)" leen del catálogo vivo en vez de duplicarlo en question_options, para que
+/// dar de alta un área no obligue a editar cinco preguntas.
+enum OptionSource {
+  STATIC
+  AREAS
+  PROCESOS
+}
+
+// ============ CATÁLOGOS ============
+
+model Area {
+  code        String  @id
+  name        String
+  isEvaluable Boolean @default(true) @map("is_evaluable")
+  headcount   Int?
+  sortOrder   Int     @default(0) @map("sort_order")
+  active      Boolean @default(true)
+
+  ownedProcesos   Proceso[]
+  answers         Answer[]
+  responsesAsOwn  SurveyResponse[]
+
+  @@map("areas")
+}
+
+model Proceso {
+  code      String  @id
+  name      String
+  ownerArea String? @map("owner_area")
+  active    Boolean @default(true)
+  sortOrder Int     @default(0) @map("sort_order")
+
+  owner Area? @relation(fields: [ownerArea], references: [code])
+
+  @@map("procesos")
+}
+
+model Component {
+  id        Int     @id @db.SmallInt
+  code      String  @unique
+  title     String
+  intro     String?
+  sortOrder Int     @map("sort_order") @db.SmallInt
+
+  questions Question[]
+
+  @@map("components")
+}
+
+model Question {
+  code         String       @id
+  componentId  Int          @map("component_id") @db.SmallInt
+  label        String
+  helpText     String?      @map("help_text")
+  type         QuestionType
+  required     Boolean      @default(true)
+  minSelect    Int?         @map("min_select") @db.SmallInt
+  maxSelect    Int?         @map("max_select") @db.SmallInt
+  perArea      Boolean      @default(false) @map("per_area")
+  optionSource OptionSource @default(STATIC) @map("option_source")
+  maxLength    Int?         @map("max_length")
+  sortOrder    Int          @map("sort_order") @db.SmallInt
+  active       Boolean      @default(true)
+
+  component Component        @relation(fields: [componentId], references: [id])
+  options   QuestionOption[]
+  answers   Answer[]
+
+  @@index([componentId])
+  @@map("questions")
+}
+
+model QuestionOption {
+  id           BigInt  @id @default(autoincrement())
+  questionCode String  @map("question_code")
+  value        String
+  label        String
+  allowsText   Boolean @default(false) @map("allows_text")
+  exclusive    Boolean @default(false)
+  sortOrder    Int     @map("sort_order") @db.SmallInt
+
+  question Question @relation(fields: [questionCode], references: [code], onDelete: Cascade)
+
+  @@unique([questionCode, value])
+  @@map("question_options")
+}
+
+// ============ CAMPAÑAS ============
+
+model Campaign {
+  id        String    @id @default(uuid(4)) @db.Uuid
+  name      String
+  startsAt  DateTime  @default(now()) @map("starts_at") @db.Timestamptz
+  endsAt    DateTime? @map("ends_at") @db.Timestamptz
+  isOpen    Boolean   @default(true) @map("is_open")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  responses SurveyResponse[]
+
+  @@map("campaigns")
+}
+
+// ============ RESPUESTAS ============
+
+model SurveyResponse {
+  id              String         @id @default(uuid(4)) @db.Uuid
+  campaignId      String         @map("campaign_id") @db.Uuid
+  status          ResponseStatus @default(DRAFT)
+  draftToken      String?        @unique @map("draft_token")
+  ownArea         String?        @map("own_area")
+  ownAreaOther    String?        @map("own_area_other")
+  respondentName  String?        @map("respondent_name")
+  respondentRole  String?        @map("respondent_role")
+  startedAt       DateTime       @default(now()) @map("started_at") @db.Timestamptz
+  submittedAt     DateTime?      @map("submitted_at") @db.Timestamptz
+  durationSeconds Int?           @map("duration_seconds")
+  lastStep        Int            @default(0) @map("last_step") @db.SmallInt
+  userAgentHash   String?        @map("user_agent_hash")
+  ipHash          String?        @map("ip_hash")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  area     Area?    @relation(fields: [ownArea], references: [code])
+  answers  Answer[]
+
+  @@index([status, campaignId])
+  @@index([ownArea])
+  @@map("survey_responses")
+}
+
+model Answer {
+  id           BigInt   @id @default(autoincrement())
+  responseId   String   @map("response_id") @db.Uuid
+  questionCode String   @map("question_code")
+  /// Centinela '__GLOBAL__' en vez de NULL: en PostgreSQL los NULL no colisionan en
+  /// índices únicos, así que un valor nullable dejaría pasar respuestas duplicadas.
+  targetArea   String   @default("__GLOBAL__") @map("target_area")
+  valueNumber  Decimal? @map("value_number") @db.Decimal(4, 1)
+  valueOption  String?  @map("value_option")
+  valueOptions String[] @map("value_options")
+  valueText    String?  @map("value_text")
+  /// Agrupación temática manual de respuestas abiertas, editada desde el admin.
+  theme        String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  response SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question Question       @relation(fields: [questionCode], references: [code])
+  area     Area           @relation(fields: [targetArea], references: [code])
+
+  @@unique([responseId, questionCode, targetArea])
+  @@index([questionCode])
+  @@index([targetArea])
+  @@index([responseId])
+  @@map("answers")
+}
+
+// ============ CONFIGURACIÓN DE INDICADORES ============
+
+model IndicatorWeight {
+  indicatorCode String  @id @map("indicator_code")
+  weight        Decimal @db.Decimal(4, 3)
+
+  @@map("indicator_weights")
+}
+
+model IndicatorThreshold {
+  id       Int     @id @default(autoincrement()) @db.SmallInt
+  label    String
+  minValue Decimal @map("min_value") @db.Decimal(5, 2)
+  maxValue Decimal @map("max_value") @db.Decimal(5, 2)
+  color    String
+  sortOrder Int    @map("sort_order") @db.SmallInt
+
+  @@map("indicator_thresholds")
+}
+
+// ============ AUDITORÍA ============
+
+model AdminAuditLog {
+  id        BigInt   @id @default(autoincrement())
+  action    String
+  detail    Json?
+  ipHash    String?  @map("ip_hash")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([action, ipHash, createdAt])
+  @@map("admin_audit_log")
+}

@@ -1,0 +1,102 @@
+{
+  "name": "linktic-diagnostico-api",
+  "version": "0.1.0",
+  "description": "API del Sistema de Diagnóstico Organizacional LinkTIC",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"src/**/*.ts\" \"prisma/**/*.ts\" --fix",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.seed.json && tsc --noEmit -p tsconfig.api.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.1.29",
+    "@nestjs/config": "4.0.4",
+    "@nestjs/core": "11.1.29",
+    "@nestjs/jwt": "11.0.2",
+    "@nestjs/passport": "11.0.5",
+    "@nestjs/platform-express": "11.1.29",
+    "@nestjs/throttler": "6.5.0",
+    "@prisma/adapter-pg": "7.9.1",
+    "@prisma/client": "7.9.1",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.15.1",
+    "cookie-parser": "1.4.7",
+    "csv-stringify": "6.8.3",
+    "dotenv": "17.4.2",
+    "exceljs": "4.4.0",
+    "helmet": "8.3.0",
+    "passport": "0.7.0",
+    "passport-jwt": "4.0.1",
+    "pg": "8.23.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
+    "@eslint/js": "^9.39.1",
+    "@nestjs/cli": "^11.0.24",
+    "@nestjs/schematics": "^11.1.0",
+    "@nestjs/testing": "11.1.29",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.2.0",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/pg": "^8.21.0",
+    "@types/supertest": "^7.2.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "globals": "^17.11.0",
+    "jest": "^30.4.2",
+    "prettier": "^3.9.6",
+    "prisma": "7.9.1",
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.12",
+    "ts-loader": "^9.6.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.12",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.67.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "roots": [
+      "<rootDir>/src",
+      "<rootDir>/prisma"
+    ],
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.(ts|js)$": "$1"
+    },
+    "collectCoverageFrom": [
+      "src/**/*.(t|j)s"
+    ],
+    "coveragePathIgnorePatterns": [
+      "src/generated/"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node"
+  }
+}

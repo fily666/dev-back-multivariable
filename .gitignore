@@ -1,0 +1,29 @@
+# dependencias
+/node_modules
+
+# salida de compilacion. Vercel compila api/index.ts con @vercel/node,
+# asi que dist/ se genera en el deploy y no se versiona.
+/dist
+/build
+*.tsbuildinfo
+
+# testing
+/coverage
+
+# env: nunca se versionan. El ejemplo si, documenta que variables necesita el proyecto.
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# misc
+.DS_Store
+*.pem
