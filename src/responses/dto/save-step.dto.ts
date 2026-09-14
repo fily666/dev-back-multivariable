@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -10,7 +11,11 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { SCALE_MAX, SCALE_MIN } from '../../common/constants';
+import {
+  RESPONDENT_ROLE_VALUES,
+  SCALE_MAX,
+  SCALE_MIN,
+} from '../../common/constants';
 
 export class AnswerInputDto {
   @IsString()
@@ -53,13 +58,15 @@ export class SaveStepDto {
   @Type(() => AnswerInputDto)
   answers!: AnswerInputDto[];
 
+  /** Área propia, capturada en la identificación antes de empezar la encuesta. */
   @IsOptional()
   @IsString()
-  @MaxLength(120)
-  respondentName?: string;
+  @MaxLength(64)
+  ownArea?: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(120)
+  @IsIn(RESPONDENT_ROLE_VALUES, {
+    message: 'El cargo no está entre los niveles del instrumento.',
+  })
   respondentRole?: string;
 }

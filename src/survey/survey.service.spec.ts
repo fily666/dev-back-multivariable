@@ -16,23 +16,23 @@ import type { PrismaService } from '../database/prisma.service';
 describe('SurveyService.getQuestionIndex', () => {
   const areas = [
     { code: 'COMERCIAL', name: 'Comercial' },
-    { code: 'TECNOLOGIA', name: 'Tecnología' },
+    { code: 'PMO', name: 'PMO' },
   ];
-  const procesos = [{ code: 'DESARROLLO', name: 'Desarrollo' }];
+  const procesos = [{ code: 'PROYECTOS', name: 'Gestión de proyectos' }];
 
   function build() {
     const prisma = {
       question: {
         findMany: jest.fn().mockResolvedValue([
           {
-            code: 'c1_area_propia',
+            code: 'c8_areas_iniciativas',
             optionSource: 'AREAS',
             options: [
               {
                 id: 1n,
-                questionCode: 'c1_area_propia',
-                value: 'OTRA',
-                label: 'Otra',
+                questionCode: 'c8_areas_iniciativas',
+                value: 'NINGUNA',
+                label: 'Ninguna',
                 allowsText: true,
                 exclusive: false,
                 sortOrder: 1,
@@ -71,26 +71,28 @@ describe('SurveyService.getQuestionIndex', () => {
 
   it('resuelve las áreas como opciones válidas de una pregunta AREAS', async () => {
     const index = await build().getQuestionIndex();
-    const values = index.get('c1_area_propia')!.options.map((o) => o.value);
+    const values = index
+      .get('c8_areas_iniciativas')!
+      .options.map((o) => o.value);
 
     expect(values).toContain('COMERCIAL');
-    expect(values).toContain('TECNOLOGIA');
+    expect(values).toContain('PMO');
   });
 
   it('conserva además las opciones estáticas, como "Otra"', async () => {
     const index = await build().getQuestionIndex();
-    const otra = index
-      .get('c1_area_propia')!
-      .options.find((o) => o.value === 'OTRA');
+    const ninguna = index
+      .get('c8_areas_iniciativas')!
+      .options.find((o) => o.value === 'NINGUNA');
 
-    expect(otra).toMatchObject({ allowsText: true });
+    expect(ninguna).toMatchObject({ allowsText: true });
   });
 
   it('resuelve los procesos en una pregunta PROCESOS', async () => {
     const index = await build().getQuestionIndex();
     expect(
       index.get('c10_proceso_reprocesos')!.options.map((o) => o.value),
-    ).toEqual(['DESARROLLO']);
+    ).toEqual(['PROYECTOS']);
   });
 
   it('no inventa opciones en una pregunta estática', async () => {

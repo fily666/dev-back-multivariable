@@ -14,7 +14,8 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model Proceso
- * 
+ * Una gestión: el proceso principal que agrupa subprocesos (`Area`). Es también el
+ * catálogo que alimenta las preguntas marcadas como "(Lista)" de procesos.
  */
 export type ProcesoModel = runtime.Types.Result.DefaultSelection<Prisma.$ProcesoPayload>
 
@@ -37,7 +38,6 @@ export type ProcesoSumAggregateOutputType = {
 export type ProcesoMinAggregateOutputType = {
   code: string | null
   name: string | null
-  ownerArea: string | null
   active: boolean | null
   sortOrder: number | null
 }
@@ -45,7 +45,6 @@ export type ProcesoMinAggregateOutputType = {
 export type ProcesoMaxAggregateOutputType = {
   code: string | null
   name: string | null
-  ownerArea: string | null
   active: boolean | null
   sortOrder: number | null
 }
@@ -53,7 +52,6 @@ export type ProcesoMaxAggregateOutputType = {
 export type ProcesoCountAggregateOutputType = {
   code: number
   name: number
-  ownerArea: number
   active: number
   sortOrder: number
   _all: number
@@ -71,7 +69,6 @@ export type ProcesoSumAggregateInputType = {
 export type ProcesoMinAggregateInputType = {
   code?: true
   name?: true
-  ownerArea?: true
   active?: true
   sortOrder?: true
 }
@@ -79,7 +76,6 @@ export type ProcesoMinAggregateInputType = {
 export type ProcesoMaxAggregateInputType = {
   code?: true
   name?: true
-  ownerArea?: true
   active?: true
   sortOrder?: true
 }
@@ -87,7 +83,6 @@ export type ProcesoMaxAggregateInputType = {
 export type ProcesoCountAggregateInputType = {
   code?: true
   name?: true
-  ownerArea?: true
   active?: true
   sortOrder?: true
   _all?: true
@@ -182,7 +177,6 @@ export type ProcesoGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type ProcesoGroupByOutputType = {
   code: string
   name: string
-  ownerArea: string | null
   active: boolean
   sortOrder: number
   _count: ProcesoCountAggregateOutputType | null
@@ -213,19 +207,17 @@ export type ProcesoWhereInput = {
   NOT?: Prisma.ProcesoWhereInput | Prisma.ProcesoWhereInput[]
   code?: Prisma.StringFilter<"Proceso"> | string
   name?: Prisma.StringFilter<"Proceso"> | string
-  ownerArea?: Prisma.StringNullableFilter<"Proceso"> | string | null
   active?: Prisma.BoolFilter<"Proceso"> | boolean
   sortOrder?: Prisma.IntFilter<"Proceso"> | number
-  owner?: Prisma.XOR<Prisma.AreaNullableScalarRelationFilter, Prisma.AreaWhereInput> | null
+  areas?: Prisma.AreaListRelationFilter
 }
 
 export type ProcesoOrderByWithRelationInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  ownerArea?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
-  owner?: Prisma.AreaOrderByWithRelationInput
+  areas?: Prisma.AreaOrderByRelationAggregateInput
 }
 
 export type ProcesoWhereUniqueInput = Prisma.AtLeast<{
@@ -234,16 +226,14 @@ export type ProcesoWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ProcesoWhereInput[]
   NOT?: Prisma.ProcesoWhereInput | Prisma.ProcesoWhereInput[]
   name?: Prisma.StringFilter<"Proceso"> | string
-  ownerArea?: Prisma.StringNullableFilter<"Proceso"> | string | null
   active?: Prisma.BoolFilter<"Proceso"> | boolean
   sortOrder?: Prisma.IntFilter<"Proceso"> | number
-  owner?: Prisma.XOR<Prisma.AreaNullableScalarRelationFilter, Prisma.AreaWhereInput> | null
+  areas?: Prisma.AreaListRelationFilter
 }, "code">
 
 export type ProcesoOrderByWithAggregationInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  ownerArea?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   _count?: Prisma.ProcesoCountOrderByAggregateInput
@@ -259,7 +249,6 @@ export type ProcesoScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ProcesoScalarWhereWithAggregatesInput | Prisma.ProcesoScalarWhereWithAggregatesInput[]
   code?: Prisma.StringWithAggregatesFilter<"Proceso"> | string
   name?: Prisma.StringWithAggregatesFilter<"Proceso"> | string
-  ownerArea?: Prisma.StringNullableWithAggregatesFilter<"Proceso"> | string | null
   active?: Prisma.BoolWithAggregatesFilter<"Proceso"> | boolean
   sortOrder?: Prisma.IntWithAggregatesFilter<"Proceso"> | number
 }
@@ -269,15 +258,15 @@ export type ProcesoCreateInput = {
   name: string
   active?: boolean
   sortOrder?: number
-  owner?: Prisma.AreaCreateNestedOneWithoutOwnedProcesosInput
+  areas?: Prisma.AreaCreateNestedManyWithoutProcesoInput
 }
 
 export type ProcesoUncheckedCreateInput = {
   code: string
   name: string
-  ownerArea?: string | null
   active?: boolean
   sortOrder?: number
+  areas?: Prisma.AreaUncheckedCreateNestedManyWithoutProcesoInput
 }
 
 export type ProcesoUpdateInput = {
@@ -285,21 +274,20 @@ export type ProcesoUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  owner?: Prisma.AreaUpdateOneWithoutOwnedProcesosNestedInput
+  areas?: Prisma.AreaUpdateManyWithoutProcesoNestedInput
 }
 
 export type ProcesoUncheckedUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerArea?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  areas?: Prisma.AreaUncheckedUpdateManyWithoutProcesoNestedInput
 }
 
 export type ProcesoCreateManyInput = {
   code: string
   name: string
-  ownerArea?: string | null
   active?: boolean
   sortOrder?: number
 }
@@ -314,25 +302,18 @@ export type ProcesoUpdateManyMutationInput = {
 export type ProcesoUncheckedUpdateManyInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerArea?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
-export type ProcesoListRelationFilter = {
-  every?: Prisma.ProcesoWhereInput
-  some?: Prisma.ProcesoWhereInput
-  none?: Prisma.ProcesoWhereInput
-}
-
-export type ProcesoOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
+export type ProcesoNullableScalarRelationFilter = {
+  is?: Prisma.ProcesoWhereInput | null
+  isNot?: Prisma.ProcesoWhereInput | null
 }
 
 export type ProcesoCountOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  ownerArea?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -344,7 +325,6 @@ export type ProcesoAvgOrderByAggregateInput = {
 export type ProcesoMaxOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  ownerArea?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -352,7 +332,6 @@ export type ProcesoMaxOrderByAggregateInput = {
 export type ProcesoMinOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  ownerArea?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -361,188 +340,143 @@ export type ProcesoSumOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
 }
 
-export type ProcesoCreateNestedManyWithoutOwnerInput = {
-  create?: Prisma.XOR<Prisma.ProcesoCreateWithoutOwnerInput, Prisma.ProcesoUncheckedCreateWithoutOwnerInput> | Prisma.ProcesoCreateWithoutOwnerInput[] | Prisma.ProcesoUncheckedCreateWithoutOwnerInput[]
-  connectOrCreate?: Prisma.ProcesoCreateOrConnectWithoutOwnerInput | Prisma.ProcesoCreateOrConnectWithoutOwnerInput[]
-  createMany?: Prisma.ProcesoCreateManyOwnerInputEnvelope
-  connect?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
+export type ProcesoCreateNestedOneWithoutAreasInput = {
+  create?: Prisma.XOR<Prisma.ProcesoCreateWithoutAreasInput, Prisma.ProcesoUncheckedCreateWithoutAreasInput>
+  connectOrCreate?: Prisma.ProcesoCreateOrConnectWithoutAreasInput
+  connect?: Prisma.ProcesoWhereUniqueInput
 }
 
-export type ProcesoUncheckedCreateNestedManyWithoutOwnerInput = {
-  create?: Prisma.XOR<Prisma.ProcesoCreateWithoutOwnerInput, Prisma.ProcesoUncheckedCreateWithoutOwnerInput> | Prisma.ProcesoCreateWithoutOwnerInput[] | Prisma.ProcesoUncheckedCreateWithoutOwnerInput[]
-  connectOrCreate?: Prisma.ProcesoCreateOrConnectWithoutOwnerInput | Prisma.ProcesoCreateOrConnectWithoutOwnerInput[]
-  createMany?: Prisma.ProcesoCreateManyOwnerInputEnvelope
-  connect?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
+export type ProcesoUpdateOneWithoutAreasNestedInput = {
+  create?: Prisma.XOR<Prisma.ProcesoCreateWithoutAreasInput, Prisma.ProcesoUncheckedCreateWithoutAreasInput>
+  connectOrCreate?: Prisma.ProcesoCreateOrConnectWithoutAreasInput
+  upsert?: Prisma.ProcesoUpsertWithoutAreasInput
+  disconnect?: Prisma.ProcesoWhereInput | boolean
+  delete?: Prisma.ProcesoWhereInput | boolean
+  connect?: Prisma.ProcesoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProcesoUpdateToOneWithWhereWithoutAreasInput, Prisma.ProcesoUpdateWithoutAreasInput>, Prisma.ProcesoUncheckedUpdateWithoutAreasInput>
 }
 
-export type ProcesoUpdateManyWithoutOwnerNestedInput = {
-  create?: Prisma.XOR<Prisma.ProcesoCreateWithoutOwnerInput, Prisma.ProcesoUncheckedCreateWithoutOwnerInput> | Prisma.ProcesoCreateWithoutOwnerInput[] | Prisma.ProcesoUncheckedCreateWithoutOwnerInput[]
-  connectOrCreate?: Prisma.ProcesoCreateOrConnectWithoutOwnerInput | Prisma.ProcesoCreateOrConnectWithoutOwnerInput[]
-  upsert?: Prisma.ProcesoUpsertWithWhereUniqueWithoutOwnerInput | Prisma.ProcesoUpsertWithWhereUniqueWithoutOwnerInput[]
-  createMany?: Prisma.ProcesoCreateManyOwnerInputEnvelope
-  set?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  disconnect?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  delete?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  connect?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  update?: Prisma.ProcesoUpdateWithWhereUniqueWithoutOwnerInput | Prisma.ProcesoUpdateWithWhereUniqueWithoutOwnerInput[]
-  updateMany?: Prisma.ProcesoUpdateManyWithWhereWithoutOwnerInput | Prisma.ProcesoUpdateManyWithWhereWithoutOwnerInput[]
-  deleteMany?: Prisma.ProcesoScalarWhereInput | Prisma.ProcesoScalarWhereInput[]
-}
-
-export type ProcesoUncheckedUpdateManyWithoutOwnerNestedInput = {
-  create?: Prisma.XOR<Prisma.ProcesoCreateWithoutOwnerInput, Prisma.ProcesoUncheckedCreateWithoutOwnerInput> | Prisma.ProcesoCreateWithoutOwnerInput[] | Prisma.ProcesoUncheckedCreateWithoutOwnerInput[]
-  connectOrCreate?: Prisma.ProcesoCreateOrConnectWithoutOwnerInput | Prisma.ProcesoCreateOrConnectWithoutOwnerInput[]
-  upsert?: Prisma.ProcesoUpsertWithWhereUniqueWithoutOwnerInput | Prisma.ProcesoUpsertWithWhereUniqueWithoutOwnerInput[]
-  createMany?: Prisma.ProcesoCreateManyOwnerInputEnvelope
-  set?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  disconnect?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  delete?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  connect?: Prisma.ProcesoWhereUniqueInput | Prisma.ProcesoWhereUniqueInput[]
-  update?: Prisma.ProcesoUpdateWithWhereUniqueWithoutOwnerInput | Prisma.ProcesoUpdateWithWhereUniqueWithoutOwnerInput[]
-  updateMany?: Prisma.ProcesoUpdateManyWithWhereWithoutOwnerInput | Prisma.ProcesoUpdateManyWithWhereWithoutOwnerInput[]
-  deleteMany?: Prisma.ProcesoScalarWhereInput | Prisma.ProcesoScalarWhereInput[]
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type ProcesoCreateWithoutOwnerInput = {
+export type ProcesoCreateWithoutAreasInput = {
   code: string
   name: string
   active?: boolean
   sortOrder?: number
 }
 
-export type ProcesoUncheckedCreateWithoutOwnerInput = {
+export type ProcesoUncheckedCreateWithoutAreasInput = {
   code: string
   name: string
   active?: boolean
   sortOrder?: number
 }
 
-export type ProcesoCreateOrConnectWithoutOwnerInput = {
+export type ProcesoCreateOrConnectWithoutAreasInput = {
   where: Prisma.ProcesoWhereUniqueInput
-  create: Prisma.XOR<Prisma.ProcesoCreateWithoutOwnerInput, Prisma.ProcesoUncheckedCreateWithoutOwnerInput>
+  create: Prisma.XOR<Prisma.ProcesoCreateWithoutAreasInput, Prisma.ProcesoUncheckedCreateWithoutAreasInput>
 }
 
-export type ProcesoCreateManyOwnerInputEnvelope = {
-  data: Prisma.ProcesoCreateManyOwnerInput | Prisma.ProcesoCreateManyOwnerInput[]
-  skipDuplicates?: boolean
+export type ProcesoUpsertWithoutAreasInput = {
+  update: Prisma.XOR<Prisma.ProcesoUpdateWithoutAreasInput, Prisma.ProcesoUncheckedUpdateWithoutAreasInput>
+  create: Prisma.XOR<Prisma.ProcesoCreateWithoutAreasInput, Prisma.ProcesoUncheckedCreateWithoutAreasInput>
+  where?: Prisma.ProcesoWhereInput
 }
 
-export type ProcesoUpsertWithWhereUniqueWithoutOwnerInput = {
-  where: Prisma.ProcesoWhereUniqueInput
-  update: Prisma.XOR<Prisma.ProcesoUpdateWithoutOwnerInput, Prisma.ProcesoUncheckedUpdateWithoutOwnerInput>
-  create: Prisma.XOR<Prisma.ProcesoCreateWithoutOwnerInput, Prisma.ProcesoUncheckedCreateWithoutOwnerInput>
+export type ProcesoUpdateToOneWithWhereWithoutAreasInput = {
+  where?: Prisma.ProcesoWhereInput
+  data: Prisma.XOR<Prisma.ProcesoUpdateWithoutAreasInput, Prisma.ProcesoUncheckedUpdateWithoutAreasInput>
 }
 
-export type ProcesoUpdateWithWhereUniqueWithoutOwnerInput = {
-  where: Prisma.ProcesoWhereUniqueInput
-  data: Prisma.XOR<Prisma.ProcesoUpdateWithoutOwnerInput, Prisma.ProcesoUncheckedUpdateWithoutOwnerInput>
-}
-
-export type ProcesoUpdateManyWithWhereWithoutOwnerInput = {
-  where: Prisma.ProcesoScalarWhereInput
-  data: Prisma.XOR<Prisma.ProcesoUpdateManyMutationInput, Prisma.ProcesoUncheckedUpdateManyWithoutOwnerInput>
-}
-
-export type ProcesoScalarWhereInput = {
-  AND?: Prisma.ProcesoScalarWhereInput | Prisma.ProcesoScalarWhereInput[]
-  OR?: Prisma.ProcesoScalarWhereInput[]
-  NOT?: Prisma.ProcesoScalarWhereInput | Prisma.ProcesoScalarWhereInput[]
-  code?: Prisma.StringFilter<"Proceso"> | string
-  name?: Prisma.StringFilter<"Proceso"> | string
-  ownerArea?: Prisma.StringNullableFilter<"Proceso"> | string | null
-  active?: Prisma.BoolFilter<"Proceso"> | boolean
-  sortOrder?: Prisma.IntFilter<"Proceso"> | number
-}
-
-export type ProcesoCreateManyOwnerInput = {
-  code: string
-  name: string
-  active?: boolean
-  sortOrder?: number
-}
-
-export type ProcesoUpdateWithoutOwnerInput = {
+export type ProcesoUpdateWithoutAreasInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
-export type ProcesoUncheckedUpdateWithoutOwnerInput = {
+export type ProcesoUncheckedUpdateWithoutAreasInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
-export type ProcesoUncheckedUpdateManyWithoutOwnerInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+
+/**
+ * Count Type ProcesoCountOutputType
+ */
+
+export type ProcesoCountOutputType = {
+  areas: number
 }
 
+export type ProcesoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  areas?: boolean | ProcesoCountOutputTypeCountAreasArgs
+}
+
+/**
+ * ProcesoCountOutputType without action
+ */
+export type ProcesoCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProcesoCountOutputType
+   */
+  select?: Prisma.ProcesoCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ProcesoCountOutputType without action
+ */
+export type ProcesoCountOutputTypeCountAreasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AreaWhereInput
+}
 
 
 export type ProcesoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
   name?: boolean
-  ownerArea?: boolean
   active?: boolean
   sortOrder?: boolean
-  owner?: boolean | Prisma.Proceso$ownerArgs<ExtArgs>
+  areas?: boolean | Prisma.Proceso$areasArgs<ExtArgs>
+  _count?: boolean | Prisma.ProcesoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["proceso"]>
 
 export type ProcesoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
   name?: boolean
-  ownerArea?: boolean
   active?: boolean
   sortOrder?: boolean
-  owner?: boolean | Prisma.Proceso$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["proceso"]>
 
 export type ProcesoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
   name?: boolean
-  ownerArea?: boolean
   active?: boolean
   sortOrder?: boolean
-  owner?: boolean | Prisma.Proceso$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["proceso"]>
 
 export type ProcesoSelectScalar = {
   code?: boolean
   name?: boolean
-  ownerArea?: boolean
   active?: boolean
   sortOrder?: boolean
 }
 
-export type ProcesoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "ownerArea" | "active" | "sortOrder", ExtArgs["result"]["proceso"]>
+export type ProcesoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "active" | "sortOrder", ExtArgs["result"]["proceso"]>
 export type ProcesoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  owner?: boolean | Prisma.Proceso$ownerArgs<ExtArgs>
+  areas?: boolean | Prisma.Proceso$areasArgs<ExtArgs>
+  _count?: boolean | Prisma.ProcesoCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type ProcesoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  owner?: boolean | Prisma.Proceso$ownerArgs<ExtArgs>
-}
-export type ProcesoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  owner?: boolean | Prisma.Proceso$ownerArgs<ExtArgs>
-}
+export type ProcesoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ProcesoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ProcesoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Proceso"
   objects: {
-    owner: Prisma.$AreaPayload<ExtArgs> | null
+    areas: Prisma.$AreaPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     code: string
     name: string
-    ownerArea: string | null
     active: boolean
     sortOrder: number
   }, ExtArgs["result"]["proceso"]>
@@ -939,7 +873,7 @@ readonly fields: ProcesoFieldRefs;
  */
 export interface Prisma__ProcesoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  owner<T extends Prisma.Proceso$ownerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Proceso$ownerArgs<ExtArgs>>): Prisma.Prisma__AreaClient<runtime.Types.Result.GetResult<Prisma.$AreaPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  areas<T extends Prisma.Proceso$areasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Proceso$areasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AreaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -971,7 +905,6 @@ export interface Prisma__ProcesoClient<T, Null = never, ExtArgs extends runtime.
 export interface ProcesoFieldRefs {
   readonly code: Prisma.FieldRef<"Proceso", 'String'>
   readonly name: Prisma.FieldRef<"Proceso", 'String'>
-  readonly ownerArea: Prisma.FieldRef<"Proceso", 'String'>
   readonly active: Prisma.FieldRef<"Proceso", 'Boolean'>
   readonly sortOrder: Prisma.FieldRef<"Proceso", 'Int'>
 }
@@ -1228,10 +1161,6 @@ export type ProcesoCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    */
   data: Prisma.ProcesoCreateManyInput | Prisma.ProcesoCreateManyInput[]
   skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ProcesoIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1302,10 +1231,6 @@ export type ProcesoUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many Procesos to update.
    */
   limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ProcesoIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1375,9 +1300,9 @@ export type ProcesoDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
- * Proceso.owner
+ * Proceso.areas
  */
-export type Proceso$ownerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Proceso$areasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Area
    */
@@ -1391,6 +1316,11 @@ export type Proceso$ownerArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   include?: Prisma.AreaInclude<ExtArgs> | null
   where?: Prisma.AreaWhereInput
+  orderBy?: Prisma.AreaOrderByWithRelationInput | Prisma.AreaOrderByWithRelationInput[]
+  cursor?: Prisma.AreaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AreaScalarFieldEnum | Prisma.AreaScalarFieldEnum[]
 }
 
 /**

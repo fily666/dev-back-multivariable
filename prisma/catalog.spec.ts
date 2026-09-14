@@ -111,12 +111,54 @@ describe('catálogo del instrumento', () => {
     });
   });
 
-  it('los procesos apuntan a áreas del catálogo', () => {
-    const areas = new Set(AREAS.map((a) => a.code));
-    const invalidos = PROCESOS.filter(
-      (p) => p.ownerArea && !areas.has(p.ownerArea),
-    ).map((p) => p.code);
-    expect(invalidos).toEqual([]);
+  it('cada área cuelga de una gestión existente', () => {
+    const gestiones = new Set(PROCESOS.map((p) => p.code));
+    const huerfanas = AREAS.filter((a) => !gestiones.has(a.procesoCode)).map(
+      (a) => a.code,
+    );
+    expect(huerfanas).toEqual([]);
+  });
+
+  it('no repite códigos de área ni de gestión', () => {
+    expect(new Set(AREAS.map((a) => a.code)).size).toBe(AREAS.length);
+    expect(new Set(PROCESOS.map((p) => p.code)).size).toBe(PROCESOS.length);
+  });
+
+  it('cubre las 12 gestiones del organigrama con sus 24 subprocesos', () => {
+    const porGestion = Object.fromEntries(
+      PROCESOS.map((p) => [
+        p.code,
+        AREAS.filter((a) => a.procesoCode === p.code).length,
+      ]),
+    );
+    expect(porGestion).toEqual({
+      GERENCIA: 5,
+      TALENTO_HUMANO: 3,
+      MEJORAMIENTO_CONTINUO: 1,
+      SERVICIOS: 1,
+      COMERCIAL: 2,
+      PROYECTOS: 1,
+      CONTRATACION_PUBLICA: 1,
+      FABRICA_SOFTWARE: 2,
+      MARKETING: 2,
+      ADMIN_FIN_CONTABLE: 3,
+      TI: 2,
+      LEGAL: 1,
+    });
+  });
+
+  it('el área propia no es una pregunta: se pide en la identificación', () => {
+    expect(QUESTIONS.some((q) => q.code === 'c1_area_propia')).toBe(false);
+  });
+
+  it('la relación principal se elige entre las áreas del catálogo', () => {
+    expect(QUESTIONS.find((q) => q.code === 'c1_area_principal')).toMatchObject(
+      {
+        componentId: 1,
+        type: 'SINGLE',
+        optionSource: 'AREAS',
+      },
+    );
   });
 
   it('cada componente conserva el texto introductorio del instrumento', () => {

@@ -43,7 +43,6 @@ export type SurveyResponseMinAggregateOutputType = {
   draftToken: string | null
   ownArea: string | null
   ownAreaOther: string | null
-  respondentName: string | null
   respondentRole: string | null
   startedAt: Date | null
   submittedAt: Date | null
@@ -62,7 +61,6 @@ export type SurveyResponseMaxAggregateOutputType = {
   draftToken: string | null
   ownArea: string | null
   ownAreaOther: string | null
-  respondentName: string | null
   respondentRole: string | null
   startedAt: Date | null
   submittedAt: Date | null
@@ -81,7 +79,6 @@ export type SurveyResponseCountAggregateOutputType = {
   draftToken: number
   ownArea: number
   ownAreaOther: number
-  respondentName: number
   respondentRole: number
   startedAt: number
   submittedAt: number
@@ -112,7 +109,6 @@ export type SurveyResponseMinAggregateInputType = {
   draftToken?: true
   ownArea?: true
   ownAreaOther?: true
-  respondentName?: true
   respondentRole?: true
   startedAt?: true
   submittedAt?: true
@@ -131,7 +127,6 @@ export type SurveyResponseMaxAggregateInputType = {
   draftToken?: true
   ownArea?: true
   ownAreaOther?: true
-  respondentName?: true
   respondentRole?: true
   startedAt?: true
   submittedAt?: true
@@ -150,7 +145,6 @@ export type SurveyResponseCountAggregateInputType = {
   draftToken?: true
   ownArea?: true
   ownAreaOther?: true
-  respondentName?: true
   respondentRole?: true
   startedAt?: true
   submittedAt?: true
@@ -256,7 +250,6 @@ export type SurveyResponseGroupByOutputType = {
   draftToken: string | null
   ownArea: string | null
   ownAreaOther: string | null
-  respondentName: string | null
   respondentRole: string | null
   startedAt: Date
   submittedAt: Date | null
@@ -298,7 +291,6 @@ export type SurveyResponseWhereInput = {
   draftToken?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   ownArea?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   ownAreaOther?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
-  respondentName?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   respondentRole?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   startedAt?: Prisma.DateTimeFilter<"SurveyResponse"> | Date | string
   submittedAt?: Prisma.DateTimeNullableFilter<"SurveyResponse"> | Date | string | null
@@ -320,7 +312,6 @@ export type SurveyResponseOrderByWithRelationInput = {
   draftToken?: Prisma.SortOrderInput | Prisma.SortOrder
   ownArea?: Prisma.SortOrderInput | Prisma.SortOrder
   ownAreaOther?: Prisma.SortOrderInput | Prisma.SortOrder
-  respondentName?: Prisma.SortOrderInput | Prisma.SortOrder
   respondentRole?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -345,7 +336,6 @@ export type SurveyResponseWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumResponseStatusFilter<"SurveyResponse"> | $Enums.ResponseStatus
   ownArea?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   ownAreaOther?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
-  respondentName?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   respondentRole?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   startedAt?: Prisma.DateTimeFilter<"SurveyResponse"> | Date | string
   submittedAt?: Prisma.DateTimeNullableFilter<"SurveyResponse"> | Date | string | null
@@ -367,7 +357,6 @@ export type SurveyResponseOrderByWithAggregationInput = {
   draftToken?: Prisma.SortOrderInput | Prisma.SortOrder
   ownArea?: Prisma.SortOrderInput | Prisma.SortOrder
   ownAreaOther?: Prisma.SortOrderInput | Prisma.SortOrder
-  respondentName?: Prisma.SortOrderInput | Prisma.SortOrder
   respondentRole?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -394,7 +383,6 @@ export type SurveyResponseScalarWhereWithAggregatesInput = {
   draftToken?: Prisma.StringNullableWithAggregatesFilter<"SurveyResponse"> | string | null
   ownArea?: Prisma.StringNullableWithAggregatesFilter<"SurveyResponse"> | string | null
   ownAreaOther?: Prisma.StringNullableWithAggregatesFilter<"SurveyResponse"> | string | null
-  respondentName?: Prisma.StringNullableWithAggregatesFilter<"SurveyResponse"> | string | null
   respondentRole?: Prisma.StringNullableWithAggregatesFilter<"SurveyResponse"> | string | null
   startedAt?: Prisma.DateTimeWithAggregatesFilter<"SurveyResponse"> | Date | string
   submittedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SurveyResponse"> | Date | string | null
@@ -411,7 +399,6 @@ export type SurveyResponseCreateInput = {
   status?: $Enums.ResponseStatus
   draftToken?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -433,7 +420,6 @@ export type SurveyResponseUncheckedCreateInput = {
   draftToken?: string | null
   ownArea?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -451,7 +437,6 @@ export type SurveyResponseUpdateInput = {
   status?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -473,7 +458,6 @@ export type SurveyResponseUncheckedUpdateInput = {
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownArea?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -493,7 +477,6 @@ export type SurveyResponseCreateManyInput = {
   draftToken?: string | null
   ownArea?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -510,7 +493,6 @@ export type SurveyResponseUpdateManyMutationInput = {
   status?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -529,7 +511,6 @@ export type SurveyResponseUncheckedUpdateManyInput = {
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownArea?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -558,7 +539,6 @@ export type SurveyResponseCountOrderByAggregateInput = {
   draftToken?: Prisma.SortOrder
   ownArea?: Prisma.SortOrder
   ownAreaOther?: Prisma.SortOrder
-  respondentName?: Prisma.SortOrder
   respondentRole?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
@@ -582,7 +562,6 @@ export type SurveyResponseMaxOrderByAggregateInput = {
   draftToken?: Prisma.SortOrder
   ownArea?: Prisma.SortOrder
   ownAreaOther?: Prisma.SortOrder
-  respondentName?: Prisma.SortOrder
   respondentRole?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
@@ -601,7 +580,6 @@ export type SurveyResponseMinOrderByAggregateInput = {
   draftToken?: Prisma.SortOrder
   ownArea?: Prisma.SortOrder
   ownAreaOther?: Prisma.SortOrder
-  respondentName?: Prisma.SortOrder
   respondentRole?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
@@ -730,7 +708,6 @@ export type SurveyResponseCreateWithoutAreaInput = {
   status?: $Enums.ResponseStatus
   draftToken?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -750,7 +727,6 @@ export type SurveyResponseUncheckedCreateWithoutAreaInput = {
   status?: $Enums.ResponseStatus
   draftToken?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -799,7 +775,6 @@ export type SurveyResponseScalarWhereInput = {
   draftToken?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   ownArea?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   ownAreaOther?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
-  respondentName?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   respondentRole?: Prisma.StringNullableFilter<"SurveyResponse"> | string | null
   startedAt?: Prisma.DateTimeFilter<"SurveyResponse"> | Date | string
   submittedAt?: Prisma.DateTimeNullableFilter<"SurveyResponse"> | Date | string | null
@@ -816,7 +791,6 @@ export type SurveyResponseCreateWithoutCampaignInput = {
   status?: $Enums.ResponseStatus
   draftToken?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -836,7 +810,6 @@ export type SurveyResponseUncheckedCreateWithoutCampaignInput = {
   draftToken?: string | null
   ownArea?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -880,7 +853,6 @@ export type SurveyResponseCreateWithoutAnswersInput = {
   status?: $Enums.ResponseStatus
   draftToken?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -901,7 +873,6 @@ export type SurveyResponseUncheckedCreateWithoutAnswersInput = {
   draftToken?: string | null
   ownArea?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -934,7 +905,6 @@ export type SurveyResponseUpdateWithoutAnswersInput = {
   status?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -955,7 +925,6 @@ export type SurveyResponseUncheckedUpdateWithoutAnswersInput = {
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownArea?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -973,7 +942,6 @@ export type SurveyResponseCreateManyAreaInput = {
   status?: $Enums.ResponseStatus
   draftToken?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -990,7 +958,6 @@ export type SurveyResponseUpdateWithoutAreaInput = {
   status?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1010,7 +977,6 @@ export type SurveyResponseUncheckedUpdateWithoutAreaInput = {
   status?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1029,7 +995,6 @@ export type SurveyResponseUncheckedUpdateManyWithoutAreaInput = {
   status?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1047,7 +1012,6 @@ export type SurveyResponseCreateManyCampaignInput = {
   draftToken?: string | null
   ownArea?: string | null
   ownAreaOther?: string | null
-  respondentName?: string | null
   respondentRole?: string | null
   startedAt?: Date | string
   submittedAt?: Date | string | null
@@ -1064,7 +1028,6 @@ export type SurveyResponseUpdateWithoutCampaignInput = {
   status?: Prisma.EnumResponseStatusFieldUpdateOperationsInput | $Enums.ResponseStatus
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1084,7 +1047,6 @@ export type SurveyResponseUncheckedUpdateWithoutCampaignInput = {
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownArea?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1103,7 +1065,6 @@ export type SurveyResponseUncheckedUpdateManyWithoutCampaignInput = {
   draftToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownArea?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownAreaOther?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  respondentName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   respondentRole?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1153,7 +1114,6 @@ export type SurveyResponseSelect<ExtArgs extends runtime.Types.Extensions.Intern
   draftToken?: boolean
   ownArea?: boolean
   ownAreaOther?: boolean
-  respondentName?: boolean
   respondentRole?: boolean
   startedAt?: boolean
   submittedAt?: boolean
@@ -1176,7 +1136,6 @@ export type SurveyResponseSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   draftToken?: boolean
   ownArea?: boolean
   ownAreaOther?: boolean
-  respondentName?: boolean
   respondentRole?: boolean
   startedAt?: boolean
   submittedAt?: boolean
@@ -1197,7 +1156,6 @@ export type SurveyResponseSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   draftToken?: boolean
   ownArea?: boolean
   ownAreaOther?: boolean
-  respondentName?: boolean
   respondentRole?: boolean
   startedAt?: boolean
   submittedAt?: boolean
@@ -1218,7 +1176,6 @@ export type SurveyResponseSelectScalar = {
   draftToken?: boolean
   ownArea?: boolean
   ownAreaOther?: boolean
-  respondentName?: boolean
   respondentRole?: boolean
   startedAt?: boolean
   submittedAt?: boolean
@@ -1230,7 +1187,7 @@ export type SurveyResponseSelectScalar = {
   updatedAt?: boolean
 }
 
-export type SurveyResponseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "campaignId" | "status" | "draftToken" | "ownArea" | "ownAreaOther" | "respondentName" | "respondentRole" | "startedAt" | "submittedAt" | "durationSeconds" | "lastStep" | "userAgentHash" | "ipHash" | "createdAt" | "updatedAt", ExtArgs["result"]["surveyResponse"]>
+export type SurveyResponseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "campaignId" | "status" | "draftToken" | "ownArea" | "ownAreaOther" | "respondentRole" | "startedAt" | "submittedAt" | "durationSeconds" | "lastStep" | "userAgentHash" | "ipHash" | "createdAt" | "updatedAt", ExtArgs["result"]["surveyResponse"]>
 export type SurveyResponseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   campaign?: boolean | Prisma.CampaignDefaultArgs<ExtArgs>
   area?: boolean | Prisma.SurveyResponse$areaArgs<ExtArgs>
@@ -1260,7 +1217,6 @@ export type $SurveyResponsePayload<ExtArgs extends runtime.Types.Extensions.Inte
     draftToken: string | null
     ownArea: string | null
     ownAreaOther: string | null
-    respondentName: string | null
     respondentRole: string | null
     startedAt: Date
     submittedAt: Date | null
@@ -1702,7 +1658,6 @@ export interface SurveyResponseFieldRefs {
   readonly draftToken: Prisma.FieldRef<"SurveyResponse", 'String'>
   readonly ownArea: Prisma.FieldRef<"SurveyResponse", 'String'>
   readonly ownAreaOther: Prisma.FieldRef<"SurveyResponse", 'String'>
-  readonly respondentName: Prisma.FieldRef<"SurveyResponse", 'String'>
   readonly respondentRole: Prisma.FieldRef<"SurveyResponse", 'String'>
   readonly startedAt: Prisma.FieldRef<"SurveyResponse", 'DateTime'>
   readonly submittedAt: Prisma.FieldRef<"SurveyResponse", 'DateTime'>

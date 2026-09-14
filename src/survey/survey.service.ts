@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
-import { GLOBAL_AREA_CODE } from '../common/constants';
+import { GLOBAL_AREA_CODE, RESPONDENT_ROLES } from '../common/constants';
 import type { OptionSource } from '../generated/prisma/enums.ts';
 import type {
   AreaDto,
   ComponentDto,
+  ProcesoDto,
   QuestionDto,
   QuestionOptionDto,
   SurveySchemaDto,
@@ -58,6 +59,12 @@ export class SurveyService {
       );
     }
 
+    // El nombre de la gestión viaja pegado a cada subproceso: así el front agrupa la
+    // lista sin tener que cruzarla contra el catálogo de procesos por su cuenta.
+    const procesoNames = new Map(
+      procesos.map((proceso) => [proceso.code, proceso.name]),
+    );
+
     const areaOptions: QuestionOptionDto[] = areas
       .filter((area) => area.code !== GLOBAL_AREA_CODE && area.isEvaluable)
       .map((area) => ({
@@ -65,6 +72,13 @@ export class SurveyService {
         label: area.name,
         allowsText: false,
         exclusive: false,
+        group:
+          area.procesoCode && procesoNames.has(area.procesoCode)
+            ? {
+                code: area.procesoCode,
+                label: procesoNames.get(area.procesoCode)!,
+              }
+            : null,
       }));
 
     const procesoOptions: QuestionOptionDto[] = procesos.map((proceso) => ({
@@ -72,6 +86,7 @@ export class SurveyService {
       label: proceso.name,
       allowsText: false,
       exclusive: false,
+      group: null,
     }));
 
     const mapped: ComponentDto[] = components.map((component) => ({
@@ -86,6 +101,7 @@ export class SurveyService {
             label: option.label,
             allowsText: option.allowsText,
             exclusive: option.exclusive,
+            group: null,
           }),
         );
 
@@ -118,7 +134,13 @@ export class SurveyService {
         code: area.code,
         name: area.name,
         isEvaluable: area.isEvaluable,
+        procesoCode: area.procesoCode,
       }));
+
+    const publicProcesos: ProcesoDto[] = procesos.map((proceso) => ({
+      code: proceso.code,
+      name: proceso.name,
+    }));
 
     return {
       campaign: {
@@ -127,14 +149,17 @@ export class SurveyService {
         isOpen: campaign.isOpen,
       },
       areas: publicAreas,
+      procesos: publicProcesos,
+      roles: RESPONDENT_ROLES.map((role) => ({
+        value: role.value,
+        label: role.label,
+      })),
       components: mapped,
       settings: {
         maxAreasInteraccion: this.config.get<number>(
           'MAX_AREAS_INTERACCION',
           5,
         ),
-        requireIdentity:
-          this.config.get<string>('SURVEY_REQUIRE_IDENTITY') === 'true',
       },
     };
   }

@@ -4,6 +4,29 @@ export const GLOBAL_AREA_CODE = '__GLOBAL__';
 /** Código de área/opción de texto libre. No agrega en la matriz de relacionamiento. */
 export const OTHER_AREA_CODE = 'OTRA';
 
+/**
+ * Niveles de cargo. Lista cerrada: se pide en la identificación junto con el área y se
+ * guarda como código, para que los cortes del panel no dependan de cómo lo escriba cada
+ * persona. Es la misma lista que el front recibe en `GET /survey/schema`.
+ */
+export const RESPONDENT_ROLES = [
+  { value: 'DIRECTOR', label: 'Director' },
+  { value: 'GERENTE', label: 'Gerente' },
+  { value: 'HEAD', label: 'Head' },
+  { value: 'COORDINADOR', label: 'Coordinador' },
+  { value: 'LIDER', label: 'Líder' },
+  { value: 'PROFESIONAL', label: 'Profesional' },
+  { value: 'ANALISTA', label: 'Analista' },
+] as const;
+
+export const RESPONDENT_ROLE_VALUES: string[] = RESPONDENT_ROLES.map(
+  (role) => role.value,
+);
+
+/** Etiqueta legible de un cargo. El código sin traducir no se muestra nunca. */
+export const RESPONDENT_ROLE_LABELS: Record<string, string> =
+  Object.fromEntries(RESPONDENT_ROLES.map((role) => [role.value, role.label]));
+
 /** Longitud máxima del texto de una opción "Otra". */
 export const OTHER_TEXT_MAX_LENGTH = 200;
 

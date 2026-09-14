@@ -26,37 +26,65 @@ async function main() {
     create: SENTINEL_AREA,
   });
 
-  for (const area of AREAS) {
-    await prisma.area.upsert({
-      where: { code: area.code },
-      update: { name: area.name, sortOrder: area.sortOrder },
-      create: area,
-    });
-  }
-
-  // 'OTRA' se captura como texto libre y se reporta aparte; no entra en la matriz de
-  // relacionamiento salvo que un admin la mapee a un área existente.
-  await prisma.area.upsert({
-    where: { code: 'OTRA' },
-    update: { name: 'Otra', isEvaluable: false, sortOrder: 900 },
-    create: { code: 'OTRA', name: 'Otra', isEvaluable: false, sortOrder: 900 },
-  });
-  console.log(
-    `  ✔ ${AREAS.length + 2} áreas (incluye OTRA y el centinela global)`,
-  );
-
+  // Las gestiones van antes que las áreas: cada subproceso las referencia por FK.
   for (const proceso of PROCESOS) {
     await prisma.proceso.upsert({
       where: { code: proceso.code },
       update: {
         name: proceso.name,
-        ownerArea: proceso.ownerArea,
         sortOrder: proceso.sortOrder,
+        active: true,
       },
       create: proceso,
     });
   }
-  console.log(`  ✔ ${PROCESOS.length} procesos`);
+  console.log(`  ✔ ${PROCESOS.length} gestiones (procesos principales)`);
+
+  for (const area of AREAS) {
+    await prisma.area.upsert({
+      where: { code: area.code },
+      update: {
+        name: area.name,
+        procesoCode: area.procesoCode,
+        sortOrder: area.sortOrder,
+        isEvaluable: true,
+        active: true,
+      },
+      create: area,
+    });
+  }
+
+  // 'OTRA' se conserva para las respuestas históricas que la usaron; ya no es
+  // seleccionable en ninguna pregunta del instrumento.
+  await prisma.area.upsert({
+    where: { code: 'OTRA' },
+    update: { name: 'Otra', isEvaluable: false, sortOrder: 900 },
+    create: { code: 'OTRA', name: 'Otra', isEvaluable: false, sortOrder: 900 },
+  });
+
+  // Un área que salió del organigrama deja de ofrecerse, pero no se borra: las
+  // respuestas ya recolectadas la referencian por FK.
+  const vigentes = [
+    ...AREAS.map((area) => area.code),
+    'OTRA',
+    SENTINEL_AREA.code,
+  ];
+  const retiradas = await prisma.area.updateMany({
+    where: { code: { notIn: vigentes } },
+    data: { active: false, isEvaluable: false },
+  });
+  console.log(
+    `  ✔ ${AREAS.length + 2} áreas (incluye OTRA y el centinela global)` +
+      (retiradas.count > 0 ? `, ${retiradas.count} retiradas` : ''),
+  );
+
+  const gestionesRetiradas = await prisma.proceso.updateMany({
+    where: { code: { notIn: PROCESOS.map((proceso) => proceso.code) } },
+    data: { active: false },
+  });
+  if (gestionesRetiradas.count > 0) {
+    console.log(`  · ${gestionesRetiradas.count} gestiones retiradas`);
+  }
 
   for (const [index, component] of COMPONENTS.entries()) {
     await prisma.component.upsert({
@@ -108,8 +136,17 @@ async function main() {
       optionCount += options.length;
     }
   }
+  // Una pregunta que sale del instrumento se desactiva, no se borra: las respuestas ya
+  // recolectadas la referencian por FK, y el panel las sigue mostrando.
+  const preguntasRetiradas = await prisma.question.updateMany({
+    where: { code: { notIn: QUESTIONS.map((question) => question.code) } },
+    data: { active: false },
+  });
   console.log(
-    `  ✔ ${QUESTIONS.length} preguntas, ${optionCount} opciones estáticas`,
+    `  ✔ ${QUESTIONS.length} preguntas, ${optionCount} opciones estáticas` +
+      (preguntasRetiradas.count > 0
+        ? `, ${preguntasRetiradas.count} retiradas`
+        : ''),
   );
 
   for (const weight of INDICATOR_WEIGHTS) {

@@ -14,7 +14,9 @@ import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model Area
- * 
+ * Un subproceso del organigrama. Es la unidad que el encuestado selecciona y la que
+ * forma las filas y columnas del mapa de relacionamiento. Cuelga de una gestión
+ * (`Proceso`), que es solo la agrupación con la que se presentan en la encuesta.
  */
 export type AreaModel = runtime.Types.Result.DefaultSelection<Prisma.$AreaPayload>
 
@@ -39,6 +41,7 @@ export type AreaSumAggregateOutputType = {
 export type AreaMinAggregateOutputType = {
   code: string | null
   name: string | null
+  procesoCode: string | null
   isEvaluable: boolean | null
   headcount: number | null
   sortOrder: number | null
@@ -48,6 +51,7 @@ export type AreaMinAggregateOutputType = {
 export type AreaMaxAggregateOutputType = {
   code: string | null
   name: string | null
+  procesoCode: string | null
   isEvaluable: boolean | null
   headcount: number | null
   sortOrder: number | null
@@ -57,6 +61,7 @@ export type AreaMaxAggregateOutputType = {
 export type AreaCountAggregateOutputType = {
   code: number
   name: number
+  procesoCode: number
   isEvaluable: number
   headcount: number
   sortOrder: number
@@ -78,6 +83,7 @@ export type AreaSumAggregateInputType = {
 export type AreaMinAggregateInputType = {
   code?: true
   name?: true
+  procesoCode?: true
   isEvaluable?: true
   headcount?: true
   sortOrder?: true
@@ -87,6 +93,7 @@ export type AreaMinAggregateInputType = {
 export type AreaMaxAggregateInputType = {
   code?: true
   name?: true
+  procesoCode?: true
   isEvaluable?: true
   headcount?: true
   sortOrder?: true
@@ -96,6 +103,7 @@ export type AreaMaxAggregateInputType = {
 export type AreaCountAggregateInputType = {
   code?: true
   name?: true
+  procesoCode?: true
   isEvaluable?: true
   headcount?: true
   sortOrder?: true
@@ -192,6 +200,7 @@ export type AreaGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type AreaGroupByOutputType = {
   code: string
   name: string
+  procesoCode: string | null
   isEvaluable: boolean
   headcount: number | null
   sortOrder: number
@@ -224,11 +233,12 @@ export type AreaWhereInput = {
   NOT?: Prisma.AreaWhereInput | Prisma.AreaWhereInput[]
   code?: Prisma.StringFilter<"Area"> | string
   name?: Prisma.StringFilter<"Area"> | string
+  procesoCode?: Prisma.StringNullableFilter<"Area"> | string | null
   isEvaluable?: Prisma.BoolFilter<"Area"> | boolean
   headcount?: Prisma.IntNullableFilter<"Area"> | number | null
   sortOrder?: Prisma.IntFilter<"Area"> | number
   active?: Prisma.BoolFilter<"Area"> | boolean
-  ownedProcesos?: Prisma.ProcesoListRelationFilter
+  proceso?: Prisma.XOR<Prisma.ProcesoNullableScalarRelationFilter, Prisma.ProcesoWhereInput> | null
   answers?: Prisma.AnswerListRelationFilter
   responsesAsOwn?: Prisma.SurveyResponseListRelationFilter
 }
@@ -236,11 +246,12 @@ export type AreaWhereInput = {
 export type AreaOrderByWithRelationInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  procesoCode?: Prisma.SortOrderInput | Prisma.SortOrder
   isEvaluable?: Prisma.SortOrder
   headcount?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   active?: Prisma.SortOrder
-  ownedProcesos?: Prisma.ProcesoOrderByRelationAggregateInput
+  proceso?: Prisma.ProcesoOrderByWithRelationInput
   answers?: Prisma.AnswerOrderByRelationAggregateInput
   responsesAsOwn?: Prisma.SurveyResponseOrderByRelationAggregateInput
 }
@@ -251,11 +262,12 @@ export type AreaWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.AreaWhereInput[]
   NOT?: Prisma.AreaWhereInput | Prisma.AreaWhereInput[]
   name?: Prisma.StringFilter<"Area"> | string
+  procesoCode?: Prisma.StringNullableFilter<"Area"> | string | null
   isEvaluable?: Prisma.BoolFilter<"Area"> | boolean
   headcount?: Prisma.IntNullableFilter<"Area"> | number | null
   sortOrder?: Prisma.IntFilter<"Area"> | number
   active?: Prisma.BoolFilter<"Area"> | boolean
-  ownedProcesos?: Prisma.ProcesoListRelationFilter
+  proceso?: Prisma.XOR<Prisma.ProcesoNullableScalarRelationFilter, Prisma.ProcesoWhereInput> | null
   answers?: Prisma.AnswerListRelationFilter
   responsesAsOwn?: Prisma.SurveyResponseListRelationFilter
 }, "code">
@@ -263,6 +275,7 @@ export type AreaWhereUniqueInput = Prisma.AtLeast<{
 export type AreaOrderByWithAggregationInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  procesoCode?: Prisma.SortOrderInput | Prisma.SortOrder
   isEvaluable?: Prisma.SortOrder
   headcount?: Prisma.SortOrderInput | Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -280,6 +293,7 @@ export type AreaScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AreaScalarWhereWithAggregatesInput | Prisma.AreaScalarWhereWithAggregatesInput[]
   code?: Prisma.StringWithAggregatesFilter<"Area"> | string
   name?: Prisma.StringWithAggregatesFilter<"Area"> | string
+  procesoCode?: Prisma.StringNullableWithAggregatesFilter<"Area"> | string | null
   isEvaluable?: Prisma.BoolWithAggregatesFilter<"Area"> | boolean
   headcount?: Prisma.IntNullableWithAggregatesFilter<"Area"> | number | null
   sortOrder?: Prisma.IntWithAggregatesFilter<"Area"> | number
@@ -293,7 +307,7 @@ export type AreaCreateInput = {
   headcount?: number | null
   sortOrder?: number
   active?: boolean
-  ownedProcesos?: Prisma.ProcesoCreateNestedManyWithoutOwnerInput
+  proceso?: Prisma.ProcesoCreateNestedOneWithoutAreasInput
   answers?: Prisma.AnswerCreateNestedManyWithoutAreaInput
   responsesAsOwn?: Prisma.SurveyResponseCreateNestedManyWithoutAreaInput
 }
@@ -301,11 +315,11 @@ export type AreaCreateInput = {
 export type AreaUncheckedCreateInput = {
   code: string
   name: string
+  procesoCode?: string | null
   isEvaluable?: boolean
   headcount?: number | null
   sortOrder?: number
   active?: boolean
-  ownedProcesos?: Prisma.ProcesoUncheckedCreateNestedManyWithoutOwnerInput
   answers?: Prisma.AnswerUncheckedCreateNestedManyWithoutAreaInput
   responsesAsOwn?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutAreaInput
 }
@@ -317,7 +331,7 @@ export type AreaUpdateInput = {
   headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  ownedProcesos?: Prisma.ProcesoUpdateManyWithoutOwnerNestedInput
+  proceso?: Prisma.ProcesoUpdateOneWithoutAreasNestedInput
   answers?: Prisma.AnswerUpdateManyWithoutAreaNestedInput
   responsesAsOwn?: Prisma.SurveyResponseUpdateManyWithoutAreaNestedInput
 }
@@ -325,11 +339,11 @@ export type AreaUpdateInput = {
 export type AreaUncheckedUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  procesoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  ownedProcesos?: Prisma.ProcesoUncheckedUpdateManyWithoutOwnerNestedInput
   answers?: Prisma.AnswerUncheckedUpdateManyWithoutAreaNestedInput
   responsesAsOwn?: Prisma.SurveyResponseUncheckedUpdateManyWithoutAreaNestedInput
 }
@@ -337,6 +351,7 @@ export type AreaUncheckedUpdateInput = {
 export type AreaCreateManyInput = {
   code: string
   name: string
+  procesoCode?: string | null
   isEvaluable?: boolean
   headcount?: number | null
   sortOrder?: number
@@ -355,6 +370,7 @@ export type AreaUpdateManyMutationInput = {
 export type AreaUncheckedUpdateManyInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  procesoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -364,6 +380,7 @@ export type AreaUncheckedUpdateManyInput = {
 export type AreaCountOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  procesoCode?: Prisma.SortOrder
   isEvaluable?: Prisma.SortOrder
   headcount?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -378,6 +395,7 @@ export type AreaAvgOrderByAggregateInput = {
 export type AreaMaxOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  procesoCode?: Prisma.SortOrder
   isEvaluable?: Prisma.SortOrder
   headcount?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -387,6 +405,7 @@ export type AreaMaxOrderByAggregateInput = {
 export type AreaMinOrderByAggregateInput = {
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  procesoCode?: Prisma.SortOrder
   isEvaluable?: Prisma.SortOrder
   headcount?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -396,6 +415,16 @@ export type AreaMinOrderByAggregateInput = {
 export type AreaSumOrderByAggregateInput = {
   headcount?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
+}
+
+export type AreaListRelationFilter = {
+  every?: Prisma.AreaWhereInput
+  some?: Prisma.AreaWhereInput
+  none?: Prisma.AreaWhereInput
+}
+
+export type AreaOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type AreaNullableScalarRelationFilter = {
@@ -432,20 +461,50 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type AreaCreateNestedOneWithoutOwnedProcesosInput = {
-  create?: Prisma.XOR<Prisma.AreaCreateWithoutOwnedProcesosInput, Prisma.AreaUncheckedCreateWithoutOwnedProcesosInput>
-  connectOrCreate?: Prisma.AreaCreateOrConnectWithoutOwnedProcesosInput
-  connect?: Prisma.AreaWhereUniqueInput
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
-export type AreaUpdateOneWithoutOwnedProcesosNestedInput = {
-  create?: Prisma.XOR<Prisma.AreaCreateWithoutOwnedProcesosInput, Prisma.AreaUncheckedCreateWithoutOwnedProcesosInput>
-  connectOrCreate?: Prisma.AreaCreateOrConnectWithoutOwnedProcesosInput
-  upsert?: Prisma.AreaUpsertWithoutOwnedProcesosInput
-  disconnect?: Prisma.AreaWhereInput | boolean
-  delete?: Prisma.AreaWhereInput | boolean
-  connect?: Prisma.AreaWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AreaUpdateToOneWithWhereWithoutOwnedProcesosInput, Prisma.AreaUpdateWithoutOwnedProcesosInput>, Prisma.AreaUncheckedUpdateWithoutOwnedProcesosInput>
+export type AreaCreateNestedManyWithoutProcesoInput = {
+  create?: Prisma.XOR<Prisma.AreaCreateWithoutProcesoInput, Prisma.AreaUncheckedCreateWithoutProcesoInput> | Prisma.AreaCreateWithoutProcesoInput[] | Prisma.AreaUncheckedCreateWithoutProcesoInput[]
+  connectOrCreate?: Prisma.AreaCreateOrConnectWithoutProcesoInput | Prisma.AreaCreateOrConnectWithoutProcesoInput[]
+  createMany?: Prisma.AreaCreateManyProcesoInputEnvelope
+  connect?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+}
+
+export type AreaUncheckedCreateNestedManyWithoutProcesoInput = {
+  create?: Prisma.XOR<Prisma.AreaCreateWithoutProcesoInput, Prisma.AreaUncheckedCreateWithoutProcesoInput> | Prisma.AreaCreateWithoutProcesoInput[] | Prisma.AreaUncheckedCreateWithoutProcesoInput[]
+  connectOrCreate?: Prisma.AreaCreateOrConnectWithoutProcesoInput | Prisma.AreaCreateOrConnectWithoutProcesoInput[]
+  createMany?: Prisma.AreaCreateManyProcesoInputEnvelope
+  connect?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+}
+
+export type AreaUpdateManyWithoutProcesoNestedInput = {
+  create?: Prisma.XOR<Prisma.AreaCreateWithoutProcesoInput, Prisma.AreaUncheckedCreateWithoutProcesoInput> | Prisma.AreaCreateWithoutProcesoInput[] | Prisma.AreaUncheckedCreateWithoutProcesoInput[]
+  connectOrCreate?: Prisma.AreaCreateOrConnectWithoutProcesoInput | Prisma.AreaCreateOrConnectWithoutProcesoInput[]
+  upsert?: Prisma.AreaUpsertWithWhereUniqueWithoutProcesoInput | Prisma.AreaUpsertWithWhereUniqueWithoutProcesoInput[]
+  createMany?: Prisma.AreaCreateManyProcesoInputEnvelope
+  set?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  disconnect?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  delete?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  connect?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  update?: Prisma.AreaUpdateWithWhereUniqueWithoutProcesoInput | Prisma.AreaUpdateWithWhereUniqueWithoutProcesoInput[]
+  updateMany?: Prisma.AreaUpdateManyWithWhereWithoutProcesoInput | Prisma.AreaUpdateManyWithWhereWithoutProcesoInput[]
+  deleteMany?: Prisma.AreaScalarWhereInput | Prisma.AreaScalarWhereInput[]
+}
+
+export type AreaUncheckedUpdateManyWithoutProcesoNestedInput = {
+  create?: Prisma.XOR<Prisma.AreaCreateWithoutProcesoInput, Prisma.AreaUncheckedCreateWithoutProcesoInput> | Prisma.AreaCreateWithoutProcesoInput[] | Prisma.AreaUncheckedCreateWithoutProcesoInput[]
+  connectOrCreate?: Prisma.AreaCreateOrConnectWithoutProcesoInput | Prisma.AreaCreateOrConnectWithoutProcesoInput[]
+  upsert?: Prisma.AreaUpsertWithWhereUniqueWithoutProcesoInput | Prisma.AreaUpsertWithWhereUniqueWithoutProcesoInput[]
+  createMany?: Prisma.AreaCreateManyProcesoInputEnvelope
+  set?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  disconnect?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  delete?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  connect?: Prisma.AreaWhereUniqueInput | Prisma.AreaWhereUniqueInput[]
+  update?: Prisma.AreaUpdateWithWhereUniqueWithoutProcesoInput | Prisma.AreaUpdateWithWhereUniqueWithoutProcesoInput[]
+  updateMany?: Prisma.AreaUpdateManyWithWhereWithoutProcesoInput | Prisma.AreaUpdateManyWithWhereWithoutProcesoInput[]
+  deleteMany?: Prisma.AreaScalarWhereInput | Prisma.AreaScalarWhereInput[]
 }
 
 export type AreaCreateNestedOneWithoutResponsesAsOwnInput = {
@@ -478,7 +537,7 @@ export type AreaUpdateOneRequiredWithoutAnswersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AreaUpdateToOneWithWhereWithoutAnswersInput, Prisma.AreaUpdateWithoutAnswersInput>, Prisma.AreaUncheckedUpdateWithoutAnswersInput>
 }
 
-export type AreaCreateWithoutOwnedProcesosInput = {
+export type AreaCreateWithoutProcesoInput = {
   code: string
   name: string
   isEvaluable?: boolean
@@ -489,7 +548,7 @@ export type AreaCreateWithoutOwnedProcesosInput = {
   responsesAsOwn?: Prisma.SurveyResponseCreateNestedManyWithoutAreaInput
 }
 
-export type AreaUncheckedCreateWithoutOwnedProcesosInput = {
+export type AreaUncheckedCreateWithoutProcesoInput = {
   code: string
   name: string
   isEvaluable?: boolean
@@ -500,42 +559,43 @@ export type AreaUncheckedCreateWithoutOwnedProcesosInput = {
   responsesAsOwn?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutAreaInput
 }
 
-export type AreaCreateOrConnectWithoutOwnedProcesosInput = {
+export type AreaCreateOrConnectWithoutProcesoInput = {
   where: Prisma.AreaWhereUniqueInput
-  create: Prisma.XOR<Prisma.AreaCreateWithoutOwnedProcesosInput, Prisma.AreaUncheckedCreateWithoutOwnedProcesosInput>
+  create: Prisma.XOR<Prisma.AreaCreateWithoutProcesoInput, Prisma.AreaUncheckedCreateWithoutProcesoInput>
 }
 
-export type AreaUpsertWithoutOwnedProcesosInput = {
-  update: Prisma.XOR<Prisma.AreaUpdateWithoutOwnedProcesosInput, Prisma.AreaUncheckedUpdateWithoutOwnedProcesosInput>
-  create: Prisma.XOR<Prisma.AreaCreateWithoutOwnedProcesosInput, Prisma.AreaUncheckedCreateWithoutOwnedProcesosInput>
-  where?: Prisma.AreaWhereInput
+export type AreaCreateManyProcesoInputEnvelope = {
+  data: Prisma.AreaCreateManyProcesoInput | Prisma.AreaCreateManyProcesoInput[]
+  skipDuplicates?: boolean
 }
 
-export type AreaUpdateToOneWithWhereWithoutOwnedProcesosInput = {
-  where?: Prisma.AreaWhereInput
-  data: Prisma.XOR<Prisma.AreaUpdateWithoutOwnedProcesosInput, Prisma.AreaUncheckedUpdateWithoutOwnedProcesosInput>
+export type AreaUpsertWithWhereUniqueWithoutProcesoInput = {
+  where: Prisma.AreaWhereUniqueInput
+  update: Prisma.XOR<Prisma.AreaUpdateWithoutProcesoInput, Prisma.AreaUncheckedUpdateWithoutProcesoInput>
+  create: Prisma.XOR<Prisma.AreaCreateWithoutProcesoInput, Prisma.AreaUncheckedCreateWithoutProcesoInput>
 }
 
-export type AreaUpdateWithoutOwnedProcesosInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  answers?: Prisma.AnswerUpdateManyWithoutAreaNestedInput
-  responsesAsOwn?: Prisma.SurveyResponseUpdateManyWithoutAreaNestedInput
+export type AreaUpdateWithWhereUniqueWithoutProcesoInput = {
+  where: Prisma.AreaWhereUniqueInput
+  data: Prisma.XOR<Prisma.AreaUpdateWithoutProcesoInput, Prisma.AreaUncheckedUpdateWithoutProcesoInput>
 }
 
-export type AreaUncheckedUpdateWithoutOwnedProcesosInput = {
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  answers?: Prisma.AnswerUncheckedUpdateManyWithoutAreaNestedInput
-  responsesAsOwn?: Prisma.SurveyResponseUncheckedUpdateManyWithoutAreaNestedInput
+export type AreaUpdateManyWithWhereWithoutProcesoInput = {
+  where: Prisma.AreaScalarWhereInput
+  data: Prisma.XOR<Prisma.AreaUpdateManyMutationInput, Prisma.AreaUncheckedUpdateManyWithoutProcesoInput>
+}
+
+export type AreaScalarWhereInput = {
+  AND?: Prisma.AreaScalarWhereInput | Prisma.AreaScalarWhereInput[]
+  OR?: Prisma.AreaScalarWhereInput[]
+  NOT?: Prisma.AreaScalarWhereInput | Prisma.AreaScalarWhereInput[]
+  code?: Prisma.StringFilter<"Area"> | string
+  name?: Prisma.StringFilter<"Area"> | string
+  procesoCode?: Prisma.StringNullableFilter<"Area"> | string | null
+  isEvaluable?: Prisma.BoolFilter<"Area"> | boolean
+  headcount?: Prisma.IntNullableFilter<"Area"> | number | null
+  sortOrder?: Prisma.IntFilter<"Area"> | number
+  active?: Prisma.BoolFilter<"Area"> | boolean
 }
 
 export type AreaCreateWithoutResponsesAsOwnInput = {
@@ -545,18 +605,18 @@ export type AreaCreateWithoutResponsesAsOwnInput = {
   headcount?: number | null
   sortOrder?: number
   active?: boolean
-  ownedProcesos?: Prisma.ProcesoCreateNestedManyWithoutOwnerInput
+  proceso?: Prisma.ProcesoCreateNestedOneWithoutAreasInput
   answers?: Prisma.AnswerCreateNestedManyWithoutAreaInput
 }
 
 export type AreaUncheckedCreateWithoutResponsesAsOwnInput = {
   code: string
   name: string
+  procesoCode?: string | null
   isEvaluable?: boolean
   headcount?: number | null
   sortOrder?: number
   active?: boolean
-  ownedProcesos?: Prisma.ProcesoUncheckedCreateNestedManyWithoutOwnerInput
   answers?: Prisma.AnswerUncheckedCreateNestedManyWithoutAreaInput
 }
 
@@ -583,18 +643,18 @@ export type AreaUpdateWithoutResponsesAsOwnInput = {
   headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  ownedProcesos?: Prisma.ProcesoUpdateManyWithoutOwnerNestedInput
+  proceso?: Prisma.ProcesoUpdateOneWithoutAreasNestedInput
   answers?: Prisma.AnswerUpdateManyWithoutAreaNestedInput
 }
 
 export type AreaUncheckedUpdateWithoutResponsesAsOwnInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  procesoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  ownedProcesos?: Prisma.ProcesoUncheckedUpdateManyWithoutOwnerNestedInput
   answers?: Prisma.AnswerUncheckedUpdateManyWithoutAreaNestedInput
 }
 
@@ -605,18 +665,18 @@ export type AreaCreateWithoutAnswersInput = {
   headcount?: number | null
   sortOrder?: number
   active?: boolean
-  ownedProcesos?: Prisma.ProcesoCreateNestedManyWithoutOwnerInput
+  proceso?: Prisma.ProcesoCreateNestedOneWithoutAreasInput
   responsesAsOwn?: Prisma.SurveyResponseCreateNestedManyWithoutAreaInput
 }
 
 export type AreaUncheckedCreateWithoutAnswersInput = {
   code: string
   name: string
+  procesoCode?: string | null
   isEvaluable?: boolean
   headcount?: number | null
   sortOrder?: number
   active?: boolean
-  ownedProcesos?: Prisma.ProcesoUncheckedCreateNestedManyWithoutOwnerInput
   responsesAsOwn?: Prisma.SurveyResponseUncheckedCreateNestedManyWithoutAreaInput
 }
 
@@ -643,19 +703,59 @@ export type AreaUpdateWithoutAnswersInput = {
   headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  ownedProcesos?: Prisma.ProcesoUpdateManyWithoutOwnerNestedInput
+  proceso?: Prisma.ProcesoUpdateOneWithoutAreasNestedInput
   responsesAsOwn?: Prisma.SurveyResponseUpdateManyWithoutAreaNestedInput
 }
 
 export type AreaUncheckedUpdateWithoutAnswersInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  procesoCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  ownedProcesos?: Prisma.ProcesoUncheckedUpdateManyWithoutOwnerNestedInput
   responsesAsOwn?: Prisma.SurveyResponseUncheckedUpdateManyWithoutAreaNestedInput
+}
+
+export type AreaCreateManyProcesoInput = {
+  code: string
+  name: string
+  isEvaluable?: boolean
+  headcount?: number | null
+  sortOrder?: number
+  active?: boolean
+}
+
+export type AreaUpdateWithoutProcesoInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answers?: Prisma.AnswerUpdateManyWithoutAreaNestedInput
+  responsesAsOwn?: Prisma.SurveyResponseUpdateManyWithoutAreaNestedInput
+}
+
+export type AreaUncheckedUpdateWithoutProcesoInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  answers?: Prisma.AnswerUncheckedUpdateManyWithoutAreaNestedInput
+  responsesAsOwn?: Prisma.SurveyResponseUncheckedUpdateManyWithoutAreaNestedInput
+}
+
+export type AreaUncheckedUpdateManyWithoutProcesoInput = {
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  isEvaluable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  headcount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -664,13 +764,11 @@ export type AreaUncheckedUpdateWithoutAnswersInput = {
  */
 
 export type AreaCountOutputType = {
-  ownedProcesos: number
   answers: number
   responsesAsOwn: number
 }
 
 export type AreaCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  ownedProcesos?: boolean | AreaCountOutputTypeCountOwnedProcesosArgs
   answers?: boolean | AreaCountOutputTypeCountAnswersArgs
   responsesAsOwn?: boolean | AreaCountOutputTypeCountResponsesAsOwnArgs
 }
@@ -683,13 +781,6 @@ export type AreaCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the AreaCountOutputType
    */
   select?: Prisma.AreaCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * AreaCountOutputType without action
- */
-export type AreaCountOutputTypeCountOwnedProcesosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ProcesoWhereInput
 }
 
 /**
@@ -710,11 +801,12 @@ export type AreaCountOutputTypeCountResponsesAsOwnArgs<ExtArgs extends runtime.T
 export type AreaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
   name?: boolean
+  procesoCode?: boolean
   isEvaluable?: boolean
   headcount?: boolean
   sortOrder?: boolean
   active?: boolean
-  ownedProcesos?: boolean | Prisma.Area$ownedProcesosArgs<ExtArgs>
+  proceso?: boolean | Prisma.Area$procesoArgs<ExtArgs>
   answers?: boolean | Prisma.Area$answersArgs<ExtArgs>
   responsesAsOwn?: boolean | Prisma.Area$responsesAsOwnArgs<ExtArgs>
   _count?: boolean | Prisma.AreaCountOutputTypeDefaultArgs<ExtArgs>
@@ -723,50 +815,60 @@ export type AreaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type AreaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
   name?: boolean
+  procesoCode?: boolean
   isEvaluable?: boolean
   headcount?: boolean
   sortOrder?: boolean
   active?: boolean
+  proceso?: boolean | Prisma.Area$procesoArgs<ExtArgs>
 }, ExtArgs["result"]["area"]>
 
 export type AreaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   code?: boolean
   name?: boolean
+  procesoCode?: boolean
   isEvaluable?: boolean
   headcount?: boolean
   sortOrder?: boolean
   active?: boolean
+  proceso?: boolean | Prisma.Area$procesoArgs<ExtArgs>
 }, ExtArgs["result"]["area"]>
 
 export type AreaSelectScalar = {
   code?: boolean
   name?: boolean
+  procesoCode?: boolean
   isEvaluable?: boolean
   headcount?: boolean
   sortOrder?: boolean
   active?: boolean
 }
 
-export type AreaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "isEvaluable" | "headcount" | "sortOrder" | "active", ExtArgs["result"]["area"]>
+export type AreaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "name" | "procesoCode" | "isEvaluable" | "headcount" | "sortOrder" | "active", ExtArgs["result"]["area"]>
 export type AreaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  ownedProcesos?: boolean | Prisma.Area$ownedProcesosArgs<ExtArgs>
+  proceso?: boolean | Prisma.Area$procesoArgs<ExtArgs>
   answers?: boolean | Prisma.Area$answersArgs<ExtArgs>
   responsesAsOwn?: boolean | Prisma.Area$responsesAsOwnArgs<ExtArgs>
   _count?: boolean | Prisma.AreaCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type AreaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type AreaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type AreaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  proceso?: boolean | Prisma.Area$procesoArgs<ExtArgs>
+}
+export type AreaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  proceso?: boolean | Prisma.Area$procesoArgs<ExtArgs>
+}
 
 export type $AreaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Area"
   objects: {
-    ownedProcesos: Prisma.$ProcesoPayload<ExtArgs>[]
+    proceso: Prisma.$ProcesoPayload<ExtArgs> | null
     answers: Prisma.$AnswerPayload<ExtArgs>[]
     responsesAsOwn: Prisma.$SurveyResponsePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     code: string
     name: string
+    procesoCode: string | null
     isEvaluable: boolean
     headcount: number | null
     sortOrder: number
@@ -1165,7 +1267,7 @@ readonly fields: AreaFieldRefs;
  */
 export interface Prisma__AreaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  ownedProcesos<T extends Prisma.Area$ownedProcesosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Area$ownedProcesosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProcesoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  proceso<T extends Prisma.Area$procesoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Area$procesoArgs<ExtArgs>>): Prisma.Prisma__ProcesoClient<runtime.Types.Result.GetResult<Prisma.$ProcesoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   answers<T extends Prisma.Area$answersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Area$answersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnswerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   responsesAsOwn<T extends Prisma.Area$responsesAsOwnArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Area$responsesAsOwnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SurveyResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1199,6 +1301,7 @@ export interface Prisma__AreaClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface AreaFieldRefs {
   readonly code: Prisma.FieldRef<"Area", 'String'>
   readonly name: Prisma.FieldRef<"Area", 'String'>
+  readonly procesoCode: Prisma.FieldRef<"Area", 'String'>
   readonly isEvaluable: Prisma.FieldRef<"Area", 'Boolean'>
   readonly headcount: Prisma.FieldRef<"Area", 'Int'>
   readonly sortOrder: Prisma.FieldRef<"Area", 'Int'>
@@ -1457,6 +1560,10 @@ export type AreaCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.AreaCreateManyInput | Prisma.AreaCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AreaIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1527,6 +1634,10 @@ export type AreaUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Areas to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AreaIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1596,9 +1707,9 @@ export type AreaDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * Area.ownedProcesos
+ * Area.proceso
  */
-export type Area$ownedProcesosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Area$procesoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Proceso
    */
@@ -1612,11 +1723,6 @@ export type Area$ownedProcesosArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   include?: Prisma.ProcesoInclude<ExtArgs> | null
   where?: Prisma.ProcesoWhereInput
-  orderBy?: Prisma.ProcesoOrderByWithRelationInput | Prisma.ProcesoOrderByWithRelationInput[]
-  cursor?: Prisma.ProcesoWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.ProcesoScalarFieldEnum | Prisma.ProcesoScalarFieldEnum[]
 }
 
 /**

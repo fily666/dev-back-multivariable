@@ -3,7 +3,7 @@ import { stringify } from 'csv-stringify';
 import ExcelJS from 'exceljs';
 import type { Response } from 'express';
 import { PrismaService } from '../database/prisma.service';
-import { GLOBAL_AREA_CODE } from '../common/constants';
+import { GLOBAL_AREA_CODE, RESPONDENT_ROLE_LABELS } from '../common/constants';
 import { safeCell } from './csv-cell.util';
 
 export const EXPORT_COLUMNS = [
@@ -144,7 +144,12 @@ export class ExportService {
           duracionSegundos: answer.response.durationSeconds,
           areaPropia: answer.response.ownArea,
           areaPropiaOtra: safeCell(answer.response.ownAreaOther),
-          cargo: safeCell(answer.response.respondentRole),
+          cargo: safeCell(
+            answer.response.respondentRole
+              ? (RESPONDENT_ROLE_LABELS[answer.response.respondentRole] ??
+                  answer.response.respondentRole)
+              : null,
+          ),
           componenteId: answer.question.componentId,
           preguntaCodigo: answer.questionCode,
           preguntaTexto: safeCell(answer.question.label),

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
-import { GLOBAL_AREA_CODE } from '../common/constants';
+import { GLOBAL_AREA_CODE, RESPONDENT_ROLE_LABELS } from '../common/constants';
 import { AnswersRepository } from './repositories/answers.repository';
 import { ResponsesRepository } from './repositories/responses.repository';
 import { WeightsService } from './weights.service';
@@ -442,9 +442,12 @@ export class AnalyticsService {
       rows: rows.map((row) => ({
         id: row.id,
         ownArea: row.ownArea,
+        ownAreaName: row.area?.name ?? null,
         ownAreaOther: row.ownAreaOther,
-        respondentName: row.respondentName,
         respondentRole: row.respondentRole,
+        respondentRoleLabel: row.respondentRole
+          ? (RESPONDENT_ROLE_LABELS[row.respondentRole] ?? row.respondentRole)
+          : null,
         submittedAt: row.submittedAt?.toISOString() ?? null,
         durationSeconds: row.durationSeconds,
         answerCount: row._count.answers,

@@ -34,29 +34,35 @@ enum OptionSource {
 
 // ============ CATÁLOGOS ============
 
+/// Un subproceso del organigrama. Es la unidad que el encuestado selecciona y la que
+/// forma las filas y columnas del mapa de relacionamiento. Cuelga de una gestión
+/// (`Proceso`), que es solo la agrupación con la que se presentan en la encuesta.
 model Area {
   code        String  @id
   name        String
+  procesoCode String? @map("proceso_code")
   isEvaluable Boolean @default(true) @map("is_evaluable")
   headcount   Int?
   sortOrder   Int     @default(0) @map("sort_order")
   active      Boolean @default(true)
 
-  ownedProcesos   Proceso[]
-  answers         Answer[]
-  responsesAsOwn  SurveyResponse[]
+  proceso        Proceso?         @relation(fields: [procesoCode], references: [code])
+  answers        Answer[]
+  responsesAsOwn SurveyResponse[]
 
+  @@index([procesoCode])
   @@map("areas")
 }
 
+/// Una gestión: el proceso principal que agrupa subprocesos (`Area`). Es también el
+/// catálogo que alimenta las preguntas marcadas como "(Lista)" de procesos.
 model Proceso {
   code      String  @id
   name      String
-  ownerArea String? @map("owner_area")
   active    Boolean @default(true)
   sortOrder Int     @default(0) @map("sort_order")
 
-  owner Area? @relation(fields: [ownerArea], references: [code])
+  areas Area[]
 
   @@map("procesos")
 }
@@ -135,7 +141,6 @@ model SurveyResponse {
   draftToken      String?        @unique @map("draft_token")
   ownArea         String?        @map("own_area")
   ownAreaOther    String?        @map("own_area_other")
-  respondentName  String?        @map("respondent_name")
   respondentRole  String?        @map("respondent_role")
   startedAt       DateTime       @default(now()) @map("started_at") @db.Timestamptz
   submittedAt     DateTime?      @map("submitted_at") @db.Timestamptz

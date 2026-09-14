@@ -7,6 +7,7 @@ import {
   multiSelectBoundsRule,
   ownAreaExclusionRule,
   perAreaSubsetRule,
+  primaryAreaRule,
   runRules,
   scaleRangeRule,
   singleSelectRule,
@@ -161,25 +162,25 @@ describe('exclusiveOptionRule', () => {
 });
 
 describe('allowsTextRule', () => {
-  const single = question('c1_area_propia', {
+  const single = question('c10_proceso_reprocesos', {
     type: 'SINGLE',
-    options: [{ value: 'PMO' }, { value: 'OTRA', allowsText: true }],
+    options: [{ value: 'PMO' }, { value: 'OTRO', allowsText: true }],
   });
 
-  it('exige texto al elegir OTRA', () => {
+  it('exige texto al elegir OTRO', () => {
     expect(
       allowsTextRule(
-        context([single], [answer(single.code, { valueOption: 'OTRA' })]),
+        context([single], [answer(single.code, { valueOption: 'OTRO' })]),
       ),
     ).toHaveLength(1);
   });
 
-  it('acepta OTRA con texto', () => {
+  it('acepta OTRO con texto', () => {
     expect(
       allowsTextRule(
         context(
           [single],
-          [answer(single.code, { valueOption: 'OTRA', valueText: 'Compras' })],
+          [answer(single.code, { valueOption: 'OTRO', valueText: 'Compras' })],
         ),
       ),
     ).toEqual([]);
@@ -193,13 +194,13 @@ describe('allowsTextRule', () => {
     ).toEqual([]);
   });
 
-  it('rechaza un texto de OTRA que excede 200 caracteres', () => {
+  it('rechaza un texto de OTRO que excede 200 caracteres', () => {
     const violations = allowsTextRule(
       context(
         [single],
         [
           answer(single.code, {
-            valueOption: 'OTRA',
+            valueOption: 'OTRO',
             valueText: 'x'.repeat(201),
           }),
         ],
@@ -336,6 +337,46 @@ describe('ownAreaExclusionRule', () => {
       ownAreaExclusionRule(
         context([pivot], [answer(pivot.code, { valueOptions: ['OTRA'] })], {
           ownArea: 'OTRA',
+        }),
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe('primaryAreaRule', () => {
+  const principal = question('c1_area_principal', {
+    type: 'SINGLE',
+    optionSource: 'AREAS',
+  });
+
+  it('acepta como principal un área que se declaró de interacción frecuente', () => {
+    expect(
+      primaryAreaRule(
+        context([principal], [answer(principal.code, { valueOption: 'PMO' })], {
+          evaluableAreas: ['PMO', 'COMERCIAL'],
+        }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('rechaza marcar como principal un área que no se seleccionó', () => {
+    expect(
+      primaryAreaRule(
+        context(
+          [principal],
+          [answer(principal.code, { valueOption: 'LEGAL' })],
+          { evaluableAreas: ['PMO', 'COMERCIAL'] },
+        ),
+      ),
+    ).toHaveLength(1);
+  });
+
+  it('no opina sobre los pasos donde no viene la marca principal', () => {
+    const otra = question('c3_claridad');
+    expect(
+      primaryAreaRule(
+        context([otra], [answer(otra.code, { valueNumber: 8 })], {
+          evaluableAreas: ['PMO'],
         }),
       ),
     ).toEqual([]);

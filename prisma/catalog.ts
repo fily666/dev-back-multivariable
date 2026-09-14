@@ -31,17 +31,187 @@ export interface QuestionSeed {
   options?: OptionSeed[];
 }
 
-// ============ ÁREAS ============
-// Catálogo unificado. El PDF lista conjuntos distintos en 1.1 y 1.2; se unifican para
-// que el mapa de relacionamiento sea una matriz cuadrada y coherente.
+// ============ GESTIONES (procesos principales) ============
+// El organigrama que LinkTIC confirmó el 14-sep-2026. Una gestión agrupa subprocesos;
+// el subproceso es lo que el encuestado selecciona. Estas gestiones son además el
+// catálogo de las preguntas que el PDF marca como "(Lista)" de procesos.
+export const PROCESOS = [
+  { code: 'GERENCIA', name: 'Gestión de gerencia', sortOrder: 1 },
+  { code: 'TALENTO_HUMANO', name: 'Gestión de talento humano', sortOrder: 2 },
+  {
+    code: 'MEJORAMIENTO_CONTINUO',
+    name: 'Gestión de mejoramiento continuo',
+    sortOrder: 3,
+  },
+  { code: 'SERVICIOS', name: 'Gestión de servicios', sortOrder: 4 },
+  { code: 'COMERCIAL', name: 'Gestión comercial', sortOrder: 5 },
+  { code: 'PROYECTOS', name: 'Gestión de proyectos', sortOrder: 6 },
+  {
+    code: 'CONTRATACION_PUBLICA',
+    name: 'Gestión de contratación pública',
+    sortOrder: 7,
+  },
+  {
+    code: 'FABRICA_SOFTWARE',
+    name: 'Gestión de fábrica de software',
+    sortOrder: 8,
+  },
+  { code: 'MARKETING', name: 'Gestión de marketing', sortOrder: 9 },
+  {
+    code: 'ADMIN_FIN_CONTABLE',
+    name: 'Gestión administrativa, financiera y contable',
+    sortOrder: 10,
+  },
+  { code: 'TI', name: 'Gestión TI', sortOrder: 11 },
+  { code: 'LEGAL', name: 'Gestión legal', sortOrder: 12 },
+];
+
+// ============ ÁREAS (subprocesos) ============
+// `sortOrder` es una sola secuencia global para que el catálogo salga ya agrupado por
+// gestión sin que el front tenga que reordenar.
 export const AREAS = [
-  { code: 'COMERCIAL', name: 'Comercial', sortOrder: 1 },
-  { code: 'INNOVACION', name: 'Innovación', sortOrder: 2 },
-  { code: 'TECNOLOGIA', name: 'Tecnología', sortOrder: 3 },
-  { code: 'PMO', name: 'PMO', sortOrder: 4 },
-  { code: 'TALENTO_HUMANO', name: 'Talento Humano', sortOrder: 5 },
-  { code: 'JURIDICA', name: 'Jurídica', sortOrder: 6 },
-  { code: 'FINANCIERA', name: 'Financiera', sortOrder: 7 },
+  // Gestión de gerencia
+  { code: 'ERP', name: 'ERP', procesoCode: 'GERENCIA', sortOrder: 1 },
+  {
+    code: 'SOSTENIBILIDAD',
+    name: 'Sostenibilidad y relación corporativa',
+    procesoCode: 'GERENCIA',
+    sortOrder: 2,
+  },
+  { code: 'GERENCIA', name: 'Gerencia', procesoCode: 'GERENCIA', sortOrder: 3 },
+  {
+    code: 'PLANEACION_ESTRATEGICA',
+    name: 'Planeación estratégica',
+    procesoCode: 'GERENCIA',
+    sortOrder: 4,
+  },
+  {
+    code: 'SEGURIDAD_INFORMACION',
+    name: 'Seguridad de la información y ciberseguridad',
+    procesoCode: 'GERENCIA',
+    sortOrder: 5,
+  },
+
+  // Gestión de talento humano
+  {
+    code: 'GLOBAL_CAPACITY',
+    name: 'Global capacity',
+    procesoCode: 'TALENTO_HUMANO',
+    sortOrder: 6,
+  },
+  {
+    code: 'TALENTO_HUMANO',
+    name: 'Gestión de talento humano',
+    procesoCode: 'TALENTO_HUMANO',
+    sortOrder: 7,
+  },
+  {
+    code: 'SST',
+    name: 'Seguridad y salud en el trabajo',
+    procesoCode: 'TALENTO_HUMANO',
+    sortOrder: 8,
+  },
+
+  // Gestión de mejoramiento continuo
+  {
+    code: 'MEJORAMIENTO_CONTINUO',
+    name: 'Mejoramiento continuo',
+    procesoCode: 'MEJORAMIENTO_CONTINUO',
+    sortOrder: 9,
+  },
+
+  // Gestión de servicios
+  {
+    code: 'SERVICIOS',
+    name: 'Gestión de servicios',
+    procesoCode: 'SERVICIOS',
+    sortOrder: 10,
+  },
+
+  // Gestión comercial
+  {
+    code: 'COMERCIAL',
+    name: 'Comercial',
+    procesoCode: 'COMERCIAL',
+    sortOrder: 11,
+  },
+  {
+    code: 'PREVENTA',
+    name: 'Preventa',
+    procesoCode: 'COMERCIAL',
+    sortOrder: 12,
+  },
+
+  // Gestión de proyectos
+  { code: 'PMO', name: 'PMO', procesoCode: 'PROYECTOS', sortOrder: 13 },
+
+  // Gestión de contratación pública
+  {
+    code: 'CONTRATACION_PUBLICA',
+    name: 'Contratación pública',
+    procesoCode: 'CONTRATACION_PUBLICA',
+    sortOrder: 14,
+  },
+
+  // Gestión de fábrica de software
+  {
+    code: 'FABRICA_SOFTWARE',
+    name: 'Fábrica de software',
+    procesoCode: 'FABRICA_SOFTWARE',
+    sortOrder: 15,
+  },
+  {
+    code: 'INGENIERIA_CLOUD',
+    name: 'Ingeniería cloud',
+    procesoCode: 'FABRICA_SOFTWARE',
+    sortOrder: 16,
+  },
+
+  // Gestión de marketing
+  {
+    code: 'MARKETING',
+    name: 'Marketing',
+    procesoCode: 'MARKETING',
+    sortOrder: 17,
+  },
+  {
+    code: 'COMUNICACIONES',
+    name: 'Comunicaciones',
+    procesoCode: 'MARKETING',
+    sortOrder: 18,
+  },
+
+  // Gestión administrativa, financiera y contable
+  {
+    code: 'ADMINISTRATIVA',
+    name: 'Administrativa',
+    procesoCode: 'ADMIN_FIN_CONTABLE',
+    sortOrder: 19,
+  },
+  {
+    code: 'CONTABLE',
+    name: 'Contable',
+    procesoCode: 'ADMIN_FIN_CONTABLE',
+    sortOrder: 20,
+  },
+  {
+    code: 'FINANCIERA',
+    name: 'Financiera',
+    procesoCode: 'ADMIN_FIN_CONTABLE',
+    sortOrder: 21,
+  },
+
+  // Gestión TI
+  { code: 'SOPORTE_TI', name: 'Soporte TI', procesoCode: 'TI', sortOrder: 22 },
+  {
+    code: 'INFRAESTRUCTURA_ON_PREMISE',
+    name: 'Infraestructura on premise',
+    procesoCode: 'TI',
+    sortOrder: 23,
+  },
+
+  // Gestión legal
+  { code: 'LEGAL', name: 'Legal', procesoCode: 'LEGAL', sortOrder: 24 },
 ];
 
 // Centinela para respuestas globales (no por área). Nunca se muestra al encuestado.
@@ -52,56 +222,6 @@ export const SENTINEL_AREA = {
   active: false,
   sortOrder: 999,
 };
-
-// ============ PROCESOS ============
-// SUPUESTO: el PDF marca esta pregunta como "(Lista)" sin definir el contenido.
-// Semilla propuesta — validar con LinkTIC antes de producción (Contexto.md §11.2).
-export const PROCESOS = [
-  { code: 'PREVENTA', name: 'Preventa', ownerArea: 'COMERCIAL', sortOrder: 1 },
-  {
-    code: 'CONTRATACION',
-    name: 'Contratación',
-    ownerArea: 'JURIDICA',
-    sortOrder: 2,
-  },
-  {
-    code: 'GESTION_PROYECTOS',
-    name: 'Gestión de proyectos',
-    ownerArea: 'PMO',
-    sortOrder: 3,
-  },
-  {
-    code: 'DESARROLLO',
-    name: 'Desarrollo',
-    ownerArea: 'TECNOLOGIA',
-    sortOrder: 4,
-  },
-  {
-    code: 'DESPLIEGUE_SOPORTE',
-    name: 'Despliegue y soporte',
-    ownerArea: 'TECNOLOGIA',
-    sortOrder: 5,
-  },
-  {
-    code: 'FACTURACION',
-    name: 'Facturación',
-    ownerArea: 'FINANCIERA',
-    sortOrder: 6,
-  },
-  { code: 'COMPRAS', name: 'Compras', ownerArea: 'FINANCIERA', sortOrder: 7 },
-  {
-    code: 'SELECCION_PERSONAL',
-    name: 'Selección y contratación de personal',
-    ownerArea: 'TALENTO_HUMANO',
-    sortOrder: 8,
-  },
-  {
-    code: 'REQUERIMIENTOS',
-    name: 'Requerimientos',
-    ownerArea: 'PMO',
-    sortOrder: 9,
-  },
-];
 
 // ============ COMPONENTES ============
 export const COMPONENTS = [
@@ -177,11 +297,6 @@ export const COMPONENTS = [
   },
 ];
 
-const OTRA_OPTION: OptionSeed = {
-  value: 'OTRA',
-  label: 'Otra',
-  allowsText: true,
-};
 const SCALE_HELP = '0 significa muy deficiente y 10 significa excelente.';
 
 /** Genera las 5 baterías de escala 0-10 que comparten estructura (C3, C4, C6, C7). */
@@ -200,25 +315,27 @@ const scale = (
 // ============ PREGUNTAS ============
 export const QUESTIONS: QuestionSeed[] = [
   // --- Componente 1 ---
-  {
-    code: 'c1_area_propia',
-    componentId: 1,
-    label: '¿A qué área pertenece?',
-    helpText: 'Marque una sola opción.',
-    type: 'SINGLE',
-    optionSource: 'AREAS',
-    options: [OTRA_OPTION],
-  },
+  // El área propia ya no se pregunta aquí: se pide en la identificación, antes de
+  // empezar, porque condiciona todo lo que sigue (no se puede evaluar la propia área).
   {
     code: 'c1_areas_interaccion',
     componentId: 1,
     label: '¿Con cuáles áreas interactúa de manera frecuente?',
-    helpText: 'Seleccione máximo cinco opciones. No incluya su propia área.',
+    helpText:
+      'Seleccione máximo cinco áreas. Están agrupadas por gestión; marque los subprocesos, no la gestión completa. No incluya su propia área.',
     type: 'MULTI',
     minSelect: 1,
     maxSelect: 5,
     optionSource: 'AREAS',
-    options: [OTRA_OPTION],
+  },
+  {
+    code: 'c1_area_principal',
+    componentId: 1,
+    label: '¿Con cuál de esas áreas se relaciona más?',
+    helpText:
+      'Marque una sola, entre las que acaba de seleccionar. Es la que pesa como relación principal en el mapa.',
+    type: 'SINGLE',
+    optionSource: 'AREAS',
   },
   {
     code: 'c1_frecuencia',
@@ -407,6 +524,7 @@ export const QUESTIONS: QuestionSeed[] = [
     code: 'c10_proceso_reprocesos',
     componentId: 10,
     label: '¿Qué proceso genera más reprocesos?',
+    helpText: 'Marque la gestión, no el subproceso.',
     type: 'SINGLE',
     optionSource: 'PROCESOS',
     options: [{ value: 'OTRO', label: 'Otro', allowsText: true }],

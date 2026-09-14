@@ -7,6 +7,13 @@ export interface AreaDto {
   code: string;
   name: string;
   isEvaluable: boolean;
+  /** Gestión a la que pertenece el subproceso. `null` solo en el centinela y en OTRA. */
+  procesoCode: string | null;
+}
+
+export interface ProcesoDto {
+  code: string;
+  name: string;
 }
 
 export interface QuestionOptionDto {
@@ -14,6 +21,17 @@ export interface QuestionOptionDto {
   label: string;
   allowsText: boolean;
   exclusive: boolean;
+  /**
+   * Agrupación con la que se presenta la opción. Las preguntas de área la traen con la
+   * gestión correspondiente, para que el front pinte los subprocesos agrupados sin
+   * conocer el organigrama.
+   */
+  group: { code: string; label: string } | null;
+}
+
+export interface RespondentRoleDto {
+  value: string;
+  label: string;
 }
 
 export interface QuestionDto {
@@ -48,10 +66,11 @@ export interface CampaignDto {
 export interface SurveySchemaDto {
   campaign: CampaignDto;
   areas: AreaDto[];
+  procesos: ProcesoDto[];
+  roles: RespondentRoleDto[];
   components: ComponentDto[];
   settings: {
     maxAreasInteraccion: number;
-    requireIdentity: boolean;
   };
 }
 

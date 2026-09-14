@@ -17,7 +17,6 @@ import type { CatalogQuestion, IncomingAnswer } from './rules';
 import type { SaveStepDto } from './dto/save-step.dto';
 
 const PIVOT_QUESTION = 'c1_areas_interaccion';
-const OWN_AREA_QUESTION = 'c1_area_propia';
 
 export interface RequestFingerprint {
   ip?: string;
@@ -70,7 +69,7 @@ export class ResponsesService {
       responseId: response.id,
       status: response.status,
       lastStep: response.lastStep,
-      respondentName: response.respondentName,
+      ownArea: response.ownArea,
       respondentRole: response.respondentRole,
       answers: response.answers.map((answer) => ({
         questionCode: answer.questionCode,
@@ -127,7 +126,12 @@ export class ResponsesService {
       valueText: answer.valueText ?? null,
     }));
 
-    const ownArea = this.resolveOwnArea(incoming, response.answers);
+    if (dto.ownArea !== undefined) await this.assertOwnArea(dto.ownArea);
+
+    // El área propia ya no es una respuesta del componente 1: se captura en la
+    // identificación y viaja con cada paso, así que se lee del paso entrante o de lo
+    // que ya quedó guardado en la respuesta.
+    const ownArea = dto.ownArea ?? response.ownArea;
     const evaluableAreas = await this.resolveEvaluableAreas(
       response.id,
       incoming,
@@ -187,13 +191,21 @@ export class ResponsesService {
       });
     }
 
-    if (this.config.get<string>('SURVEY_REQUIRE_IDENTITY') === 'true') {
-      if (!response.respondentName?.trim()) {
-        throw new UnprocessableEntityException({
-          message: 'El nombre es obligatorio en esta campaña.',
-          missing: [{ questionCode: 'respondentName', componentId: 0 }],
-        });
-      }
+    // El área y el cargo son obligatorios: sin área no hay fila en el mapa de
+    // relacionamiento, y sin cargo no hay corte por nivel. El componente 0 es la
+    // identificación, que el front resuelve llevando al paso de bienvenida.
+    const identityMissing = [
+      ...(response.ownArea ? [] : ['ownArea']),
+      ...(response.respondentRole ? [] : ['respondentRole']),
+    ];
+    if (identityMissing.length > 0) {
+      throw new UnprocessableEntityException({
+        message: 'Falta la identificación: indique su área y su cargo.',
+        missing: identityMissing.map((questionCode) => ({
+          questionCode,
+          componentId: 0,
+        })),
+      });
     }
 
     const submittedAt = new Date();
@@ -238,19 +250,18 @@ export class ResponsesService {
     }
   }
 
-  /** El área propia puede venir en este paso o ya estar guardada de un paso anterior. */
-  private resolveOwnArea(
-    incoming: IncomingAnswer[],
-    stored: { questionCode: string; valueOption: string | null }[],
-  ): string | null {
-    const fromIncoming = incoming.find(
-      (a) => a.questionCode === OWN_AREA_QUESTION,
-    );
-    if (fromIncoming) return fromIncoming.valueOption ?? null;
-    return (
-      stored.find((a) => a.questionCode === OWN_AREA_QUESTION)?.valueOption ??
-      null
-    );
+  /** El área propia tiene que ser un subproceso vigente del organigrama. */
+  private async assertOwnArea(code: string) {
+    const area = await this.prisma.area.findFirst({
+      where: { code, active: true, isEvaluable: true },
+      select: { code: true },
+    });
+    if (!area) {
+      throw new BadRequestException({
+        message: 'El área indicada no está en el catálogo del instrumento.',
+        ownArea: code,
+      });
+    }
   }
 
   /**
@@ -333,27 +344,13 @@ export class ResponsesService {
         });
       }
 
-      const ownArea = incoming.find(
-        (a) => a.questionCode === OWN_AREA_QUESTION,
-      );
       await tx.surveyResponse.update({
         where: { id: responseId },
         data: {
           lastStep: componentId,
-          ...(ownArea
-            ? {
-                ownArea: ownArea.valueOption,
-                ownAreaOther: sanitizeText(
-                  ownArea.valueText,
-                  OTHER_TEXT_MAX_LENGTH,
-                ),
-              }
-            : {}),
-          ...(dto.respondentName !== undefined
-            ? { respondentName: sanitizeText(dto.respondentName, 120) }
-            : {}),
+          ...(dto.ownArea !== undefined ? { ownArea: dto.ownArea } : {}),
           ...(dto.respondentRole !== undefined
-            ? { respondentRole: sanitizeText(dto.respondentRole, 120) }
+            ? { respondentRole: dto.respondentRole }
             : {}),
         },
       });

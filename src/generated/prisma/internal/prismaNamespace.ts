@@ -1283,6 +1283,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const AreaScalarFieldEnum = {
   code: 'code',
   name: 'name',
+  procesoCode: 'procesoCode',
   isEvaluable: 'isEvaluable',
   headcount: 'headcount',
   sortOrder: 'sortOrder',
@@ -1295,7 +1296,6 @@ export type AreaScalarFieldEnum = (typeof AreaScalarFieldEnum)[keyof typeof Area
 export const ProcesoScalarFieldEnum = {
   code: 'code',
   name: 'name',
-  ownerArea: 'ownerArea',
   active: 'active',
   sortOrder: 'sortOrder'
 } as const
@@ -1365,7 +1365,6 @@ export const SurveyResponseScalarFieldEnum = {
   draftToken: 'draftToken',
   ownArea: 'ownArea',
   ownAreaOther: 'ownAreaOther',
-  respondentName: 'respondentName',
   respondentRole: 'respondentRole',
   startedAt: 'startedAt',
   submittedAt: 'submittedAt',

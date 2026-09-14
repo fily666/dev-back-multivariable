@@ -23,7 +23,7 @@ cp .env.example .env
 #   JWT_SECRET y HASH_SALT: openssl rand -base64 48   (distintos entre sí)
 
 npx prisma generate          # cliente tipado en src/generated/prisma
-npx prisma migrate deploy    # crea las 11 tablas
+npx prisma migrate deploy    # crea las 11 tablas y aplica el árbol de procesos
 npx prisma db seed           # siembra el catálogo del instrumento
 
 npm run start:dev            # http://localhost:3001/api/v1
@@ -109,7 +109,7 @@ así que **añadir una pregunta al instrumento no obliga a tocar código de vali
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| `GET` | `/survey/schema` | Catálogo completo: campaña, áreas, 10 componentes con sus preguntas y opciones ya resueltas, y `settings` (`maxAreasInteraccion`, `requireIdentity`). Es lo que dirige el wizard. |
+| `GET` | `/survey/schema` | Catálogo completo: campaña, áreas (con su `procesoCode`), las 12 gestiones, los 7 cargos, 10 componentes con sus preguntas y opciones ya resueltas —las de área traen su gestión en `option.group`— y `settings` (`maxAreasInteraccion`). Es lo que dirige el wizard. |
 | `POST` | `/responses` | Abre un borrador y devuelve su `draftToken`. Limitado a 10/min por IP. |
 | `GET` | `/responses/:draftToken` | Recupera un borrador para retomarlo. |
 | `PATCH` | `/responses/:draftToken/step/:componentId` | Guarda un paso. Cuerpo: `{ answers: AnswerInputDto[], respondentName?, respondentRole? }`. Aplica las 8 reglas; devuelve **422** con detalle por pregunta si alguna falla. |
@@ -189,7 +189,13 @@ identificables por área.
 **Configuración** — `indicator_weights`, `indicator_thresholds`
 **Auditoría** — `admin_audit_log`
 
-Tres detalles que no son obvios:
+Cuatro detalles que no son obvios:
+
+**`procesos` son las gestiones y `areas` son los subprocesos, que cuelgan de ellas** vía
+`areas.proceso_code`. La jerarquía se invirtió el 14-sep-2026 (antes un `proceso` colgaba de
+un `area`). El encuestado selecciona siempre subprocesos; la gestión es la agrupación con la
+que se le presentan. El catálogo de la pregunta "¿qué proceso genera más reprocesos?" son las
+gestiones.
 
 **`answers.target_area` usa el centinela `'__GLOBAL__'` en vez de `NULL`.** En PostgreSQL los
 `NULL` no colisionan en índices únicos, así que una columna nullable dejaría pasar respuestas
@@ -289,4 +295,4 @@ npm run typecheck && npm run lint && npm test && npm run build
 npx prisma validate
 ```
 
-Estado al 14-ago-2026: los cinco pasan — 145/145 tests, schema válido.
+Estado al 14-sep-2026: los cinco pasan — 152/152 tests, schema válido.

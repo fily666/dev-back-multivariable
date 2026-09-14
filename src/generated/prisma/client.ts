@@ -41,12 +41,15 @@ export { Prisma }
 
 /**
  * Model Area
- * 
+ * Un subproceso del organigrama. Es la unidad que el encuestado selecciona y la que
+ * forma las filas y columnas del mapa de relacionamiento. Cuelga de una gestión
+ * (`Proceso`), que es solo la agrupación con la que se presentan en la encuesta.
  */
 export type Area = Prisma.AreaModel
 /**
  * Model Proceso
- * 
+ * Una gestión: el proceso principal que agrupa subprocesos (`Area`). Es también el
+ * catálogo que alimenta las preguntas marcadas como "(Lista)" de procesos.
  */
 export type Proceso = Prisma.ProcesoModel
 /**

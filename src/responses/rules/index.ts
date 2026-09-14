@@ -3,6 +3,7 @@ import { exclusiveOptionRule } from './exclusive-option.rule';
 import { multiSelectBoundsRule } from './multi-select-bounds.rule';
 import { ownAreaExclusionRule } from './own-area-exclusion.rule';
 import { perAreaSubsetRule } from './per-area-subset.rule';
+import { primaryAreaRule } from './primary-area.rule';
 import { scaleRangeRule } from './scale-range.rule';
 import { singleSelectRule } from './single-select.rule';
 import { textLengthRule } from './text-length.rule';
@@ -21,6 +22,7 @@ export const STEP_RULES: Rule[] = [
   textLengthRule,
   perAreaSubsetRule,
   ownAreaExclusionRule,
+  primaryAreaRule,
 ];
 
 export function runRules(
@@ -37,6 +39,7 @@ export {
   multiSelectBoundsRule,
   ownAreaExclusionRule,
   perAreaSubsetRule,
+  primaryAreaRule,
   scaleRangeRule,
   singleSelectRule,
   textLengthRule,
