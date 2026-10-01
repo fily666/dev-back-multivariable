@@ -25,6 +25,8 @@ export function question(
     componentId: 1,
     label: code,
     helpText: null,
+    scaleMinLabel: null,
+    scaleMaxLabel: null,
     type: 'SCALE_0_10',
     required: true,
     minSelect: null,

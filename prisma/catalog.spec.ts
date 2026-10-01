@@ -66,6 +66,53 @@ describe('catálogo del instrumento', () => {
     expect(malFormadas).toEqual([]);
   });
 
+  it('cada escala trae sus dos anclas, cortas para caber a los extremos de la regla', () => {
+    const escalas = QUESTIONS.filter(
+      (q) => q.type === 'SCALE_0_10' || q.type === 'MATRIX_AREA',
+    );
+    const sinAnclas = escalas
+      .filter((q) => !q.scaleMinLabel?.trim() || !q.scaleMaxLabel?.trim())
+      .map((q) => q.code);
+    expect(sinAnclas).toEqual([]);
+
+    const largas = escalas
+      .flatMap((q) => [q.scaleMinLabel ?? '', q.scaleMaxLabel ?? ''])
+      .filter((ancla) => ancla.length > 28);
+    expect(largas).toEqual([]);
+
+    const repetidas = escalas
+      .filter((q) => q.scaleMinLabel === q.scaleMaxLabel)
+      .map((q) => q.code);
+    expect(repetidas).toEqual([]);
+  });
+
+  it('las anclas genéricas del PDF no vuelven a colarse en las escalas', () => {
+    const genericas = QUESTIONS.filter(
+      (q) =>
+        /^muy deficiente$/i.test(q.scaleMinLabel ?? '') ||
+        /^excelente$/i.test(q.scaleMaxLabel ?? '') ||
+        /significa/i.test(q.helpText ?? ''),
+    ).map((q) => q.code);
+    expect(genericas).toEqual([]);
+  });
+
+  it('las preguntas que no son escala no declaran anclas', () => {
+    const conAnclas = QUESTIONS.filter(
+      (q) =>
+        q.type !== 'SCALE_0_10' &&
+        q.type !== 'MATRIX_AREA' &&
+        (q.scaleMinLabel || q.scaleMaxLabel),
+    ).map((q) => q.code);
+    expect(conAnclas).toEqual([]);
+  });
+
+  it('el NPS conserva las anclas estándar de probabilidad', () => {
+    expect(QUESTIONS.find((q) => q.code === 'c9_nps')).toMatchObject({
+      scaleMinLabel: 'Nada probable',
+      scaleMaxLabel: 'Totalmente probable',
+    });
+  });
+
   it('solo el componente 2 y el NPS se evalúan por área', () => {
     const perArea = QUESTIONS.filter((q) => q.perArea)
       .map((q) => q.code)

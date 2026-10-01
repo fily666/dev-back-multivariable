@@ -47,6 +47,8 @@ export type QuestionMinAggregateOutputType = {
   componentId: number | null
   label: string | null
   helpText: string | null
+  scaleMinLabel: string | null
+  scaleMaxLabel: string | null
   type: $Enums.QuestionType | null
   required: boolean | null
   minSelect: number | null
@@ -63,6 +65,8 @@ export type QuestionMaxAggregateOutputType = {
   componentId: number | null
   label: string | null
   helpText: string | null
+  scaleMinLabel: string | null
+  scaleMaxLabel: string | null
   type: $Enums.QuestionType | null
   required: boolean | null
   minSelect: number | null
@@ -79,6 +83,8 @@ export type QuestionCountAggregateOutputType = {
   componentId: number
   label: number
   helpText: number
+  scaleMinLabel: number
+  scaleMaxLabel: number
   type: number
   required: number
   minSelect: number
@@ -113,6 +119,8 @@ export type QuestionMinAggregateInputType = {
   componentId?: true
   label?: true
   helpText?: true
+  scaleMinLabel?: true
+  scaleMaxLabel?: true
   type?: true
   required?: true
   minSelect?: true
@@ -129,6 +137,8 @@ export type QuestionMaxAggregateInputType = {
   componentId?: true
   label?: true
   helpText?: true
+  scaleMinLabel?: true
+  scaleMaxLabel?: true
   type?: true
   required?: true
   minSelect?: true
@@ -145,6 +155,8 @@ export type QuestionCountAggregateInputType = {
   componentId?: true
   label?: true
   helpText?: true
+  scaleMinLabel?: true
+  scaleMaxLabel?: true
   type?: true
   required?: true
   minSelect?: true
@@ -248,6 +260,8 @@ export type QuestionGroupByOutputType = {
   componentId: number
   label: string
   helpText: string | null
+  scaleMinLabel: string | null
+  scaleMaxLabel: string | null
   type: $Enums.QuestionType
   required: boolean
   minSelect: number | null
@@ -287,6 +301,8 @@ export type QuestionWhereInput = {
   componentId?: Prisma.IntFilter<"Question"> | number
   label?: Prisma.StringFilter<"Question"> | string
   helpText?: Prisma.StringNullableFilter<"Question"> | string | null
+  scaleMinLabel?: Prisma.StringNullableFilter<"Question"> | string | null
+  scaleMaxLabel?: Prisma.StringNullableFilter<"Question"> | string | null
   type?: Prisma.EnumQuestionTypeFilter<"Question"> | $Enums.QuestionType
   required?: Prisma.BoolFilter<"Question"> | boolean
   minSelect?: Prisma.IntNullableFilter<"Question"> | number | null
@@ -306,6 +322,8 @@ export type QuestionOrderByWithRelationInput = {
   componentId?: Prisma.SortOrder
   label?: Prisma.SortOrder
   helpText?: Prisma.SortOrderInput | Prisma.SortOrder
+  scaleMinLabel?: Prisma.SortOrderInput | Prisma.SortOrder
+  scaleMaxLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   required?: Prisma.SortOrder
   minSelect?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -328,6 +346,8 @@ export type QuestionWhereUniqueInput = Prisma.AtLeast<{
   componentId?: Prisma.IntFilter<"Question"> | number
   label?: Prisma.StringFilter<"Question"> | string
   helpText?: Prisma.StringNullableFilter<"Question"> | string | null
+  scaleMinLabel?: Prisma.StringNullableFilter<"Question"> | string | null
+  scaleMaxLabel?: Prisma.StringNullableFilter<"Question"> | string | null
   type?: Prisma.EnumQuestionTypeFilter<"Question"> | $Enums.QuestionType
   required?: Prisma.BoolFilter<"Question"> | boolean
   minSelect?: Prisma.IntNullableFilter<"Question"> | number | null
@@ -347,6 +367,8 @@ export type QuestionOrderByWithAggregationInput = {
   componentId?: Prisma.SortOrder
   label?: Prisma.SortOrder
   helpText?: Prisma.SortOrderInput | Prisma.SortOrder
+  scaleMinLabel?: Prisma.SortOrderInput | Prisma.SortOrder
+  scaleMaxLabel?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   required?: Prisma.SortOrder
   minSelect?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -371,6 +393,8 @@ export type QuestionScalarWhereWithAggregatesInput = {
   componentId?: Prisma.IntWithAggregatesFilter<"Question"> | number
   label?: Prisma.StringWithAggregatesFilter<"Question"> | string
   helpText?: Prisma.StringNullableWithAggregatesFilter<"Question"> | string | null
+  scaleMinLabel?: Prisma.StringNullableWithAggregatesFilter<"Question"> | string | null
+  scaleMaxLabel?: Prisma.StringNullableWithAggregatesFilter<"Question"> | string | null
   type?: Prisma.EnumQuestionTypeWithAggregatesFilter<"Question"> | $Enums.QuestionType
   required?: Prisma.BoolWithAggregatesFilter<"Question"> | boolean
   minSelect?: Prisma.IntNullableWithAggregatesFilter<"Question"> | number | null
@@ -386,6 +410,8 @@ export type QuestionCreateInput = {
   code: string
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -405,6 +431,8 @@ export type QuestionUncheckedCreateInput = {
   componentId: number
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -422,6 +450,8 @@ export type QuestionUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -441,6 +471,8 @@ export type QuestionUncheckedUpdateInput = {
   componentId?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -459,6 +491,8 @@ export type QuestionCreateManyInput = {
   componentId: number
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -474,6 +508,8 @@ export type QuestionUpdateManyMutationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -490,6 +526,8 @@ export type QuestionUncheckedUpdateManyInput = {
   componentId?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -516,6 +554,8 @@ export type QuestionCountOrderByAggregateInput = {
   componentId?: Prisma.SortOrder
   label?: Prisma.SortOrder
   helpText?: Prisma.SortOrder
+  scaleMinLabel?: Prisma.SortOrder
+  scaleMaxLabel?: Prisma.SortOrder
   type?: Prisma.SortOrder
   required?: Prisma.SortOrder
   minSelect?: Prisma.SortOrder
@@ -540,6 +580,8 @@ export type QuestionMaxOrderByAggregateInput = {
   componentId?: Prisma.SortOrder
   label?: Prisma.SortOrder
   helpText?: Prisma.SortOrder
+  scaleMinLabel?: Prisma.SortOrder
+  scaleMaxLabel?: Prisma.SortOrder
   type?: Prisma.SortOrder
   required?: Prisma.SortOrder
   minSelect?: Prisma.SortOrder
@@ -556,6 +598,8 @@ export type QuestionMinOrderByAggregateInput = {
   componentId?: Prisma.SortOrder
   label?: Prisma.SortOrder
   helpText?: Prisma.SortOrder
+  scaleMinLabel?: Prisma.SortOrder
+  scaleMaxLabel?: Prisma.SortOrder
   type?: Prisma.SortOrder
   required?: Prisma.SortOrder
   minSelect?: Prisma.SortOrder
@@ -662,6 +706,8 @@ export type QuestionCreateWithoutComponentInput = {
   code: string
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -679,6 +725,8 @@ export type QuestionUncheckedCreateWithoutComponentInput = {
   code: string
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -726,6 +774,8 @@ export type QuestionScalarWhereInput = {
   componentId?: Prisma.IntFilter<"Question"> | number
   label?: Prisma.StringFilter<"Question"> | string
   helpText?: Prisma.StringNullableFilter<"Question"> | string | null
+  scaleMinLabel?: Prisma.StringNullableFilter<"Question"> | string | null
+  scaleMaxLabel?: Prisma.StringNullableFilter<"Question"> | string | null
   type?: Prisma.EnumQuestionTypeFilter<"Question"> | $Enums.QuestionType
   required?: Prisma.BoolFilter<"Question"> | boolean
   minSelect?: Prisma.IntNullableFilter<"Question"> | number | null
@@ -741,6 +791,8 @@ export type QuestionCreateWithoutOptionsInput = {
   code: string
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -759,6 +811,8 @@ export type QuestionUncheckedCreateWithoutOptionsInput = {
   componentId: number
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -791,6 +845,8 @@ export type QuestionUpdateWithoutOptionsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -809,6 +865,8 @@ export type QuestionUncheckedUpdateWithoutOptionsInput = {
   componentId?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -825,6 +883,8 @@ export type QuestionCreateWithoutAnswersInput = {
   code: string
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -843,6 +903,8 @@ export type QuestionUncheckedCreateWithoutAnswersInput = {
   componentId: number
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -875,6 +937,8 @@ export type QuestionUpdateWithoutAnswersInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -893,6 +957,8 @@ export type QuestionUncheckedUpdateWithoutAnswersInput = {
   componentId?: Prisma.IntFieldUpdateOperationsInput | number
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -909,6 +975,8 @@ export type QuestionCreateManyComponentInput = {
   code: string
   label: string
   helpText?: string | null
+  scaleMinLabel?: string | null
+  scaleMaxLabel?: string | null
   type: $Enums.QuestionType
   required?: boolean
   minSelect?: number | null
@@ -924,6 +992,8 @@ export type QuestionUpdateWithoutComponentInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -941,6 +1011,8 @@ export type QuestionUncheckedUpdateWithoutComponentInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -958,6 +1030,8 @@ export type QuestionUncheckedUpdateManyWithoutComponentInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   helpText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMinLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scaleMaxLabel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumQuestionTypeFieldUpdateOperationsInput | $Enums.QuestionType
   required?: Prisma.BoolFieldUpdateOperationsInput | boolean
   minSelect?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -1014,6 +1088,8 @@ export type QuestionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   componentId?: boolean
   label?: boolean
   helpText?: boolean
+  scaleMinLabel?: boolean
+  scaleMaxLabel?: boolean
   type?: boolean
   required?: boolean
   minSelect?: boolean
@@ -1034,6 +1110,8 @@ export type QuestionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   componentId?: boolean
   label?: boolean
   helpText?: boolean
+  scaleMinLabel?: boolean
+  scaleMaxLabel?: boolean
   type?: boolean
   required?: boolean
   minSelect?: boolean
@@ -1051,6 +1129,8 @@ export type QuestionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   componentId?: boolean
   label?: boolean
   helpText?: boolean
+  scaleMinLabel?: boolean
+  scaleMaxLabel?: boolean
   type?: boolean
   required?: boolean
   minSelect?: boolean
@@ -1068,6 +1148,8 @@ export type QuestionSelectScalar = {
   componentId?: boolean
   label?: boolean
   helpText?: boolean
+  scaleMinLabel?: boolean
+  scaleMaxLabel?: boolean
   type?: boolean
   required?: boolean
   minSelect?: boolean
@@ -1079,7 +1161,7 @@ export type QuestionSelectScalar = {
   active?: boolean
 }
 
-export type QuestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "componentId" | "label" | "helpText" | "type" | "required" | "minSelect" | "maxSelect" | "perArea" | "optionSource" | "maxLength" | "sortOrder" | "active", ExtArgs["result"]["question"]>
+export type QuestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"code" | "componentId" | "label" | "helpText" | "scaleMinLabel" | "scaleMaxLabel" | "type" | "required" | "minSelect" | "maxSelect" | "perArea" | "optionSource" | "maxLength" | "sortOrder" | "active", ExtArgs["result"]["question"]>
 export type QuestionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   component?: boolean | Prisma.ComponentDefaultArgs<ExtArgs>
   options?: boolean | Prisma.Question$optionsArgs<ExtArgs>
@@ -1105,6 +1187,11 @@ export type $QuestionPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     componentId: number
     label: string
     helpText: string | null
+    /**
+     * Anclas de las escalas 0-10: qué significa el 0 y qué el 10 para ESTA pregunta.
+     */
+    scaleMinLabel: string | null
+    scaleMaxLabel: string | null
     type: $Enums.QuestionType
     required: boolean
     minSelect: number | null
@@ -1544,6 +1631,8 @@ export interface QuestionFieldRefs {
   readonly componentId: Prisma.FieldRef<"Question", 'Int'>
   readonly label: Prisma.FieldRef<"Question", 'String'>
   readonly helpText: Prisma.FieldRef<"Question", 'String'>
+  readonly scaleMinLabel: Prisma.FieldRef<"Question", 'String'>
+  readonly scaleMaxLabel: Prisma.FieldRef<"Question", 'String'>
   readonly type: Prisma.FieldRef<"Question", 'QuestionType'>
   readonly required: Prisma.FieldRef<"Question", 'Boolean'>
   readonly minSelect: Prisma.FieldRef<"Question", 'Int'>

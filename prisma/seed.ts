@@ -105,6 +105,11 @@ async function main() {
     const { options, ...fields } = question;
     const data = {
       ...fields,
+      // null explícito: en un upsert, `undefined` deja intacto lo que ya había, y un texto
+      // de ayuda o un ancla que sale del catálogo debe salir también de la base.
+      helpText: fields.helpText ?? null,
+      scaleMinLabel: fields.scaleMinLabel ?? null,
+      scaleMaxLabel: fields.scaleMaxLabel ?? null,
       required: fields.required ?? true,
       perArea: fields.perArea ?? false,
       optionSource: fields.optionSource ?? 'STATIC',

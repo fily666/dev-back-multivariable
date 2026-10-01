@@ -119,6 +119,8 @@ export const QuestionScalarFieldEnum = {
   componentId: 'componentId',
   label: 'label',
   helpText: 'helpText',
+  scaleMinLabel: 'scaleMinLabel',
+  scaleMaxLabel: 'scaleMaxLabel',
   type: 'type',
   required: 'required',
   minSelect: 'minSelect',

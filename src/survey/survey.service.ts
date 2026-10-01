@@ -117,6 +117,8 @@ export class SurveyService {
           componentId: question.componentId,
           label: question.label,
           helpText: question.helpText,
+          scaleMinLabel: question.scaleMinLabel,
+          scaleMaxLabel: question.scaleMaxLabel,
           type: question.type,
           required: question.required,
           minSelect: question.minSelect,

@@ -21,6 +21,10 @@ export interface QuestionSeed {
   componentId: number;
   label: string;
   helpText?: string;
+  /** Qué significa el 0 en esta escala. Solo SCALE_0_10 y MATRIX_AREA. */
+  scaleMinLabel?: string;
+  /** Qué significa el 10 en esta escala. Solo SCALE_0_10 y MATRIX_AREA. */
+  scaleMaxLabel?: string;
   type: QuestionType;
   required?: boolean;
   minSelect?: number;
@@ -297,19 +301,36 @@ export const COMPONENTS = [
   },
 ];
 
-const SCALE_HELP = '0 significa muy deficiente y 10 significa excelente.';
+/**
+ * Anclas de una escala 0-10: [lo que significa el 0, lo que significa el 10].
+ *
+ * El PDF usa "muy deficiente / excelente" para todo, y eso no se lee bien en la mitad de
+ * los ítems: "Cumplen los compromisos — excelente" obliga a traducir una frecuencia a una
+ * nota. Cada pregunta nombra su propio tema en las anclas ("Comunicación deficiente",
+ * "Siempre cumplen"), y el 10 es siempre el polo favorable, que es lo que asumen los
+ * índices. Van cortas porque se pintan a los extremos de la regla, también en móvil.
+ * Reemplazan al antiguo texto de ayuda "0 significa… y 10 significa…": decían lo mismo dos
+ * veces en cada pregunta.
+ */
+type Anchors = readonly [min: string, max: string];
 
-/** Genera las 5 baterías de escala 0-10 que comparten estructura (C3, C4, C6, C7). */
+const anchored = ([scaleMinLabel, scaleMaxLabel]: Anchors) => ({
+  scaleMinLabel,
+  scaleMaxLabel,
+});
+
+/** Genera los ítems de escala 0-10 globales (C3 a C8). */
 const scale = (
   code: string,
   componentId: number,
   label: string,
+  anchors: Anchors,
 ): QuestionSeed => ({
   code,
   componentId,
   label,
   type: 'SCALE_0_10',
-  helpText: SCALE_HELP,
+  ...anchored(anchors),
 });
 
 // ============ PREGUNTAS ============
@@ -374,7 +395,7 @@ export const QUESTIONS: QuestionSeed[] = [
     label: 'Facilidad para trabajar',
     type: 'MATRIX_AREA',
     perArea: true,
-    helpText: SCALE_HELP,
+    ...anchored(['Muy difícil trabajar juntos', 'Muy fácil trabajar juntos']),
   },
   {
     code: 'c2_comunicacion',
@@ -382,7 +403,7 @@ export const QUESTIONS: QuestionSeed[] = [
     label: 'Comunicación',
     type: 'MATRIX_AREA',
     perArea: true,
-    helpText: SCALE_HELP,
+    ...anchored(['Comunicación deficiente', 'Comunicación excelente']),
   },
   {
     code: 'c2_confianza',
@@ -390,7 +411,7 @@ export const QUESTIONS: QuestionSeed[] = [
     label: 'Confianza',
     type: 'MATRIX_AREA',
     perArea: true,
-    helpText: SCALE_HELP,
+    ...anchored(['Ninguna confianza', 'Confianza total']),
   },
   {
     code: 'c2_cumplimiento',
@@ -398,7 +419,7 @@ export const QUESTIONS: QuestionSeed[] = [
     label: 'Cumplimiento',
     type: 'MATRIX_AREA',
     perArea: true,
-    helpText: SCALE_HELP,
+    ...anchored(['Nunca cumplen', 'Siempre cumplen']),
   },
   {
     code: 'c2_valor',
@@ -406,22 +427,52 @@ export const QUESTIONS: QuestionSeed[] = [
     label: 'Generación de valor',
     type: 'MATRIX_AREA',
     perArea: true,
-    helpText: SCALE_HELP,
+    ...anchored(['No aporta valor', 'Aporta mucho valor']),
   },
 
   // --- Componente 3 ---
-  scale('c3_oportunidad', 3, 'La información llega oportunamente'),
-  scale('c3_claridad', 3, 'La comunicación es clara'),
-  scale('c3_comprension', 3, 'Comprendemos fácilmente los requerimientos'),
-  scale('c3_canales', 3, 'Los canales funcionan adecuadamente'),
-  scale('c3_reproceso', 3, 'Se evita el reproceso por mala comunicación'),
+  scale('c3_oportunidad', 3, 'La información llega oportunamente', [
+    'Nunca llega a tiempo',
+    'Siempre llega a tiempo',
+  ]),
+  scale('c3_claridad', 3, 'La comunicación es clara', [
+    'Comunicación confusa',
+    'Comunicación muy clara',
+  ]),
+  scale('c3_comprension', 3, 'Comprendemos fácilmente los requerimientos', [
+    'Cuesta mucho entenderlos',
+    'Se entienden fácilmente',
+  ]),
+  scale('c3_canales', 3, 'Los canales funcionan adecuadamente', [
+    'Funcionan muy mal',
+    'Funcionan muy bien',
+  ]),
+  scale('c3_reproceso', 3, 'Se evita el reproceso por mala comunicación', [
+    'Siempre hay reproceso',
+    'Nunca hay reproceso',
+  ]),
 
   // --- Componente 4 ---
-  scale('c4_disposicion', 4, 'Existe disposición para ayudar'),
-  scale('c4_comprension', 4, 'Comprenden nuestras necesidades'),
-  scale('c4_seguimiento', 4, 'Dan seguimiento a las solicitudes'),
-  scale('c4_compromisos', 4, 'Cumplen los compromisos'),
-  scale('c4_valor', 4, 'Agregan valor al proceso'),
+  scale('c4_disposicion', 4, 'Existe disposición para ayudar', [
+    'Ninguna disposición',
+    'Total disposición',
+  ]),
+  scale('c4_comprension', 4, 'Comprenden nuestras necesidades', [
+    'No las comprenden',
+    'Las comprenden por completo',
+  ]),
+  scale('c4_seguimiento', 4, 'Dan seguimiento a las solicitudes', [
+    'Nunca dan seguimiento',
+    'Siempre dan seguimiento',
+  ]),
+  scale('c4_compromisos', 4, 'Cumplen los compromisos', [
+    'Nunca cumplen',
+    'Siempre cumplen',
+  ]),
+  scale('c4_valor', 4, 'Agregan valor al proceso', [
+    'No agregan valor',
+    'Agregan mucho valor',
+  ]),
 
   // --- Componente 5 ---
   {
@@ -437,24 +488,66 @@ export const QUESTIONS: QuestionSeed[] = [
       { value: 'MAS_3_DIAS', label: 'Más de tres días' },
     ],
   },
-  scale('c5_cumplimiento_tiempos', 5, 'Cumplimiento de tiempos'),
-  scale('c5_capacidad_respuesta', 5, 'Capacidad de respuesta'),
-  scale('c5_facilidad_resolver', 5, 'Facilidad para resolver solicitudes'),
-  scale('c5_seguimiento', 5, 'Seguimiento'),
+  scale('c5_cumplimiento_tiempos', 5, 'Cumplimiento de tiempos', [
+    'Nunca se cumplen',
+    'Siempre se cumplen',
+  ]),
+  scale('c5_capacidad_respuesta', 5, 'Capacidad de respuesta', [
+    'Respuesta muy lenta',
+    'Respuesta muy ágil',
+  ]),
+  scale('c5_facilidad_resolver', 5, 'Facilidad para resolver solicitudes', [
+    'Muy difícil resolverlas',
+    'Muy fácil resolverlas',
+  ]),
+  scale('c5_seguimiento', 5, 'Seguimiento', [
+    'Sin seguimiento',
+    'Seguimiento constante',
+  ]),
 
   // --- Componente 6 ---
-  scale('c6_impacto', 6, 'Conozco cómo mi proceso impacta otros procesos'),
-  scale('c6_roles', 6, 'Existe claridad en los roles'),
-  scale('c6_coordinacion', 6, 'Hay coordinación entre áreas'),
-  scale('c6_reprocesos', 6, 'Se minimizan los reprocesos'),
-  scale('c6_responsabilidades', 6, 'Las responsabilidades son claras'),
+  scale('c6_impacto', 6, 'Conozco cómo mi proceso impacta otros procesos', [
+    'No lo conozco',
+    'Lo conozco a fondo',
+  ]),
+  scale('c6_roles', 6, 'Existe claridad en los roles', [
+    'Roles nada claros',
+    'Roles totalmente claros',
+  ]),
+  scale('c6_coordinacion', 6, 'Hay coordinación entre áreas', [
+    'Sin coordinación',
+    'Coordinación excelente',
+  ]),
+  scale('c6_reprocesos', 6, 'Se minimizan los reprocesos', [
+    'Reprocesos constantes',
+    'Reprocesos mínimos',
+  ]),
+  scale('c6_responsabilidades', 6, 'Las responsabilidades son claras', [
+    'Nada claras',
+    'Totalmente claras',
+  ]),
 
   // --- Componente 7 ---
-  scale('c7_conocimiento', 7, 'Compartimos conocimiento'),
-  scale('c7_confianza', 7, 'Existe confianza'),
-  scale('c7_soluciones', 7, 'Buscamos soluciones conjuntamente'),
-  scale('c7_aprendizaje', 7, 'Hay apertura al aprendizaje'),
-  scale('c7_objetivos', 7, 'Trabajamos por objetivos comunes'),
+  scale('c7_conocimiento', 7, 'Compartimos conocimiento', [
+    'Nunca lo compartimos',
+    'Siempre lo compartimos',
+  ]),
+  scale('c7_confianza', 7, 'Existe confianza', [
+    'Ninguna confianza',
+    'Confianza plena',
+  ]),
+  scale('c7_soluciones', 7, 'Buscamos soluciones conjuntamente', [
+    'Cada uno por su lado',
+    'Siempre en conjunto',
+  ]),
+  scale('c7_aprendizaje', 7, 'Hay apertura al aprendizaje', [
+    'Ninguna apertura',
+    'Apertura total',
+  ]),
+  scale('c7_objetivos', 7, 'Trabajamos por objetivos comunes', [
+    'Objetivos desalineados',
+    'Objetivos alineados',
+  ]),
 
   // --- Componente 8 ---
   {
@@ -468,19 +561,33 @@ export const QUESTIONS: QuestionSeed[] = [
     optionSource: 'AREAS',
     options: [{ value: 'NINGUNA', label: 'Ninguna', exclusive: true }],
   },
-  scale('c8_disposicion', 8, 'Disposición para innovar'),
-  scale('c8_apertura', 8, 'Apertura al cambio'),
-  scale('c8_capacidad_mejoras', 8, 'Capacidad para implementar mejoras'),
-  scale('c8_aprendizaje', 8, 'Aprendizaje compartido'),
+  scale('c8_disposicion', 8, 'Disposición para innovar', [
+    'Ninguna disposición',
+    'Total disposición',
+  ]),
+  scale('c8_apertura', 8, 'Apertura al cambio', [
+    'Resistencia al cambio',
+    'Total apertura al cambio',
+  ]),
+  scale('c8_capacidad_mejoras', 8, 'Capacidad para implementar mejoras', [
+    'Capacidad muy baja',
+    'Capacidad muy alta',
+  ]),
+  scale('c8_aprendizaje', 8, 'Aprendizaje compartido', [
+    'Nunca se comparte',
+    'Siempre se comparte',
+  ]),
 
   // --- Componente 9 (NPS por área evaluada) ---
+  // Las anclas son las del NPS estándar: cambiarlas rompe la comparación con cualquier
+  // otro NPS.
   {
     code: 'c9_nps',
     componentId: 9,
     label: '¿Qué tan probable es que recomiende trabajar con esta área?',
-    helpText: '0 significa nada probable y 10 significa totalmente probable.',
     type: 'SCALE_0_10',
     perArea: true,
+    ...anchored(['Nada probable', 'Totalmente probable']),
   },
   {
     code: 'c9_motivos',

@@ -80,19 +80,22 @@ model Component {
 }
 
 model Question {
-  code         String       @id
-  componentId  Int          @map("component_id") @db.SmallInt
-  label        String
-  helpText     String?      @map("help_text")
-  type         QuestionType
-  required     Boolean      @default(true)
-  minSelect    Int?         @map("min_select") @db.SmallInt
-  maxSelect    Int?         @map("max_select") @db.SmallInt
-  perArea      Boolean      @default(false) @map("per_area")
-  optionSource OptionSource @default(STATIC) @map("option_source")
-  maxLength    Int?         @map("max_length")
-  sortOrder    Int          @map("sort_order") @db.SmallInt
-  active       Boolean      @default(true)
+  code          String       @id
+  componentId   Int          @map("component_id") @db.SmallInt
+  label         String
+  helpText      String?      @map("help_text")
+  /// Anclas de las escalas 0-10: qué significa el 0 y qué el 10 para ESTA pregunta.
+  scaleMinLabel String?      @map("scale_min_label")
+  scaleMaxLabel String?      @map("scale_max_label")
+  type          QuestionType
+  required      Boolean      @default(true)
+  minSelect     Int?         @map("min_select") @db.SmallInt
+  maxSelect     Int?         @map("max_select") @db.SmallInt
+  perArea       Boolean      @default(false) @map("per_area")
+  optionSource  OptionSource @default(STATIC) @map("option_source")
+  maxLength     Int?         @map("max_length")
+  sortOrder     Int          @map("sort_order") @db.SmallInt
+  active        Boolean      @default(true)
 
   component Component        @relation(fields: [componentId], references: [id])
   options   QuestionOption[]

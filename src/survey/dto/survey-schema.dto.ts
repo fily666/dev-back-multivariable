@@ -39,6 +39,10 @@ export interface QuestionDto {
   componentId: number;
   label: string;
   helpText: string | null;
+  /** Qué significa el 0 en una escala. `null` fuera de SCALE_0_10 y MATRIX_AREA. */
+  scaleMinLabel: string | null;
+  /** Qué significa el 10 en una escala. `null` fuera de SCALE_0_10 y MATRIX_AREA. */
+  scaleMaxLabel: string | null;
   type: QuestionType;
   required: boolean;
   minSelect: number | null;
