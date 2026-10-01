@@ -25,26 +25,24 @@ export function computeIag(rows: RawAnswerRow[]): IndicatorResult {
   const scales = aggregateScaleItems(rows, IAG_SCALE_CODES);
 
   // El tiempo se promedia por respuesta: es una sola opción por persona, y contarla una
-  // vez por fila la ponderaría según cuántas escalas respondió.
+  // vez por fila la ponderaría según cuántas escalas respondió. Solo cuenta como
+  // respondente quien aporta un score: "No conoce el ANS / No aplica" no lo aporta.
   const timeScores: number[] = [];
-  for (const responseRows of groupByResponse(rows).values()) {
+  const respondents = new Set(scales.respondentIds);
+  for (const [responseId, responseRows] of groupByResponse(rows)) {
     const score = optionScore(
       RESPONSE_TIME_SCORES,
       selectedOption(responseRows, IAG_TIME_CODE),
     );
-    if (score !== null) timeScores.push(score);
+    if (score === null) continue;
+    timeScores.push(score);
+    respondents.add(responseId);
   }
 
   const value = weightedAverage([
     { value: toIndex(scales.average), weight: WEIGHT_SCALES },
     { value: averageOf(timeScores), weight: WEIGHT_TIME },
   ]);
-
-  const respondents = new Set(scales.respondentIds);
-  for (const [responseId, responseRows] of groupByResponse(rows)) {
-    if (selectedOption(responseRows, IAG_TIME_CODE) !== null)
-      respondents.add(responseId);
-  }
 
   return {
     code: 'IAG',

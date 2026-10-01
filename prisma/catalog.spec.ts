@@ -1,3 +1,5 @@
+import { RESPONSE_TIME_SCORES } from '../src/common/constants';
+import { RESPONSE_TIME_ORDER } from '../src/analytics/kpis/distribution.kpi';
 import {
   AREAS,
   COMPONENTS,
@@ -89,9 +91,10 @@ describe('catálogo del instrumento', () => {
   it('las anclas genéricas del PDF no vuelven a colarse en las escalas', () => {
     const genericas = QUESTIONS.filter(
       (q) =>
-        /^muy deficiente$/i.test(q.scaleMinLabel ?? '') ||
-        /^excelente$/i.test(q.scaleMaxLabel ?? '') ||
-        /significa/i.test(q.helpText ?? ''),
+        (q.type === 'SCALE_0_10' || q.type === 'MATRIX_AREA') &&
+        (/^muy deficiente$/i.test(q.scaleMinLabel ?? '') ||
+          /^excelente$/i.test(q.scaleMaxLabel ?? '') ||
+          /significa/i.test(q.helpText ?? '')),
     ).map((q) => q.code);
     expect(genericas).toEqual([]);
   });
@@ -111,6 +114,21 @@ describe('catálogo del instrumento', () => {
       scaleMinLabel: 'Nada probable',
       scaleMaxLabel: 'Totalmente probable',
     });
+  });
+
+  it('el tiempo de respuesta pregunta por el ANS y cada opción tiene su lugar en el panel', () => {
+    const valores = QUESTIONS.find(
+      (q) => q.code === 'c5_tiempo_respuesta',
+    )?.options?.map((o) => o.value);
+
+    // La distribución del panel sigue el mismo orden que ve el encuestado.
+    expect(valores).toEqual([...RESPONSE_TIME_ORDER]);
+
+    // Todas puntúan en el IAG menos "No conoce el ANS / No aplica".
+    const sinScore = (valores ?? []).filter(
+      (valor) => !(valor in RESPONSE_TIME_SCORES),
+    );
+    expect(sinScore).toEqual(['NO_CONOCE_ANS']);
   });
 
   it('solo el componente 2 y el NPS se evalúan por área', () => {

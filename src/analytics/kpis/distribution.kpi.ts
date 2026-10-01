@@ -71,20 +71,27 @@ export function countSingleOptions(
     .sort((a, b) => b.count - a.count);
 }
 
-/** KPI 13: distribución del tiempo de respuesta percibido, en el orden del instrumento. */
-const RESPONSE_TIME_ORDER = [
-  'MENOS_2H',
-  'MISMO_DIA',
-  'H24',
-  'H48',
-  'MAS_3_DIAS',
+/**
+ * KPI 13: cumplimiento del ANS en las respuestas, en el orden del instrumento.
+ *
+ * Solo cuenta las opciones vigentes. Las respuestas con los tramos de horas de antes del
+ * 1-oct-2026 quedan fuera: miden otra cosa, y mezclarlas en la misma distribución pondría
+ * "Menos de 2 horas" al lado de "Cumple el ANS" como si fueran comparables. Siguen
+ * contando en el IAG (ver RESPONSE_TIME_SCORES).
+ */
+export const RESPONSE_TIME_ORDER = [
+  'SUPERA_ANS',
+  'CUMPLE_ANS',
+  'CUMPLE_PARCIAL_ANS',
+  'NO_CUMPLE_ANS',
+  'NO_CONOCE_ANS',
 ] as const;
 const RESPONSE_TIME_LABELS: Record<string, string> = {
-  MENOS_2H: 'Menos de 2 horas',
-  MISMO_DIA: 'Mismo día',
-  H24: '24 horas',
-  H48: '48 horas',
-  MAS_3_DIAS: 'Más de tres días',
+  SUPERA_ANS: 'Supera el ANS',
+  CUMPLE_ANS: 'Cumple el ANS',
+  CUMPLE_PARCIAL_ANS: 'Cumple parcialmente el ANS',
+  NO_CUMPLE_ANS: 'No cumple el ANS',
+  NO_CONOCE_ANS: 'No conoce el ANS / No aplica',
 };
 
 export function buildResponseTimeDistribution(
@@ -96,12 +103,13 @@ export function buildResponseTimeDistribution(
   for (const row of rows) {
     if (row.questionCode !== 'c5_tiempo_respuesta' || !row.valueOption)
       continue;
+    if (!(row.valueOption in RESPONSE_TIME_LABELS)) continue;
     counts.set(row.valueOption, (counts.get(row.valueOption) ?? 0) + 1);
     total += 1;
   }
 
-  // Se conserva el orden del instrumento y se incluyen los tramos con cero: un hueco en la
-  // distribución es información, y ordenarla por frecuencia perdería la escala temporal.
+  // Se conserva el orden del instrumento y se incluyen las opciones con cero: un hueco en
+  // la distribución es información, y ordenarla por frecuencia perdería la escala.
   return RESPONSE_TIME_ORDER.map((value) => {
     const count = counts.get(value) ?? 0;
     return {

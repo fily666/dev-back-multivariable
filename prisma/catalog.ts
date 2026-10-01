@@ -475,17 +475,24 @@ export const QUESTIONS: QuestionSeed[] = [
   ]),
 
   // --- Componente 5 ---
+  // Desde el 1-oct-2026 se pregunta por el cumplimiento del ANS y no por tramos de horas:
+  // "24 horas" es rápido para una solicitud y lento para otra. Las respuestas anteriores
+  // conservan sus códigos (MENOS_2H…MAS_3_DIAS) y siguen puntuando en el IAG; ver
+  // RESPONSE_TIME_SCORES.
   {
     code: 'c5_tiempo_respuesta',
     componentId: 5,
-    label: 'Cuando realiza solicitudes, normalmente recibe respuesta en:',
+    label:
+      'Cuando realiza solicitudes, ¿la respuesta que normalmente recibe cumple el ANS?',
+    helpText:
+      'ANS: acuerdo de nivel de servicio, el tiempo de respuesta pactado. «Supera el ANS» significa que le responden antes de ese tiempo.',
     type: 'SINGLE',
     options: [
-      { value: 'MENOS_2H', label: 'Menos de 2 horas' },
-      { value: 'MISMO_DIA', label: 'Mismo día' },
-      { value: 'H24', label: '24 horas' },
-      { value: 'H48', label: '48 horas' },
-      { value: 'MAS_3_DIAS', label: 'Más de tres días' },
+      { value: 'SUPERA_ANS', label: 'Supera el ANS' },
+      { value: 'CUMPLE_ANS', label: 'Cumple el ANS' },
+      { value: 'CUMPLE_PARCIAL_ANS', label: 'Cumple parcialmente el ANS' },
+      { value: 'NO_CUMPLE_ANS', label: 'No cumple el ANS' },
+      { value: 'NO_CONOCE_ANS', label: 'No conoce el ANS / No aplica' },
     ],
   },
   scale('c5_cumplimiento_tiempos', 5, 'Cumplimiento de tiempos', [

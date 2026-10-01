@@ -189,23 +189,23 @@ describe('NIO', () => {
 
 describe('IAG', () => {
   it('pondera las escalas al 75% y el tiempo de respuesta al 25%', () => {
-    // Escalas: (8,8,8,8) -> 8.0 -> 80 ; Tiempo: MISMO_DIA = 80
+    // Escalas: (8,8,8,8) -> 8.0 -> 80 ; Tiempo: CUMPLE_ANS = 80
     // 0.75*80 + 0.25*80 = 80
     const rows = [
       ...scaleBattery('r1', IAG_SCALE_CODES, [8, 8, 8, 8]),
-      optionRow('r1', 'c5_tiempo_respuesta', 'MISMO_DIA'),
+      optionRow('r1', 'c5_tiempo_respuesta', 'CUMPLE_ANS'),
     ];
     expect(computeIag(rows).value).toBe(80);
   });
 
   it('separa el efecto de cada mitad', () => {
-    // Escalas: (10,10,10,10) -> 100 ; Tiempo: MAS_3_DIAS = 10
-    // 0.75*100 + 0.25*10 = 75 + 2.5 = 77.5
+    // Escalas: (10,10,10,10) -> 100 ; Tiempo: CUMPLE_PARCIAL_ANS = 50
+    // 0.75*100 + 0.25*50 = 75 + 12.5 = 87.5
     const rows = [
       ...scaleBattery('r1', IAG_SCALE_CODES, [10, 10, 10, 10]),
-      optionRow('r1', 'c5_tiempo_respuesta', 'MAS_3_DIAS'),
+      optionRow('r1', 'c5_tiempo_respuesta', 'CUMPLE_PARCIAL_ANS'),
     ];
-    expect(computeIag(rows).value).toBe(77.5);
+    expect(computeIag(rows).value).toBe(87.5);
   });
 
   it('reescala al 100% las escalas si no hay tiempo declarado', () => {
@@ -215,22 +215,48 @@ describe('IAG', () => {
   });
 
   it('funciona con solo el tiempo declarado', () => {
-    const rows = [optionRow('r1', 'c5_tiempo_respuesta', 'MENOS_2H')];
+    const rows = [optionRow('r1', 'c5_tiempo_respuesta', 'SUPERA_ANS')];
     expect(computeIag(rows).value).toBe(100);
   });
 
   it('promedia el tiempo por respuesta, no por fila de escala', () => {
     // r1 tiene 4 escalas y r2 solo 1, pero cada uno aporta UN tiempo.
     // Escalas: (10,10,10,10, 0) -> 40/5 = 8.0 -> 80
-    // Tiempos: MENOS_2H=100 y MAS_3_DIAS=10 -> 55
-    // 0.75*80 + 0.25*55 = 60 + 13.75 = 73.75
+    // Tiempos: SUPERA_ANS=100 y NO_CUMPLE_ANS=0 -> 50
+    // 0.75*80 + 0.25*50 = 60 + 12.5 = 72.5
     const rows = [
       ...scaleBattery('r1', IAG_SCALE_CODES, [10, 10, 10, 10]),
-      optionRow('r1', 'c5_tiempo_respuesta', 'MENOS_2H'),
+      optionRow('r1', 'c5_tiempo_respuesta', 'SUPERA_ANS'),
       scaleRow('r2', IAG_SCALE_CODES[0], 0),
-      optionRow('r2', 'c5_tiempo_respuesta', 'MAS_3_DIAS'),
+      optionRow('r2', 'c5_tiempo_respuesta', 'NO_CUMPLE_ANS'),
     ];
-    expect(computeIag(rows).value).toBe(73.75);
+    expect(computeIag(rows).value).toBe(72.5);
+  });
+
+  it('"No conoce el ANS / No aplica" no puntúa ni cuenta como respondente', () => {
+    // Escalas -> 60. El tiempo no aporta score: el IAG queda en las escalas, no en 45.
+    const conEscalas = [
+      ...scaleBattery('r1', IAG_SCALE_CODES, [6, 6, 6, 6]),
+      optionRow('r1', 'c5_tiempo_respuesta', 'NO_CONOCE_ANS'),
+    ];
+    expect(computeIag(conEscalas).value).toBe(60);
+
+    const soloNoAplica = [
+      optionRow('r1', 'c5_tiempo_respuesta', 'NO_CONOCE_ANS'),
+    ];
+    expect(computeIag(soloNoAplica)).toMatchObject({
+      value: null,
+      respondents: 0,
+    });
+  });
+
+  it('las respuestas con los tramos de horas anteriores siguen puntuando', () => {
+    // Tiempos: MENOS_2H=100 (instrumento viejo) y NO_CUMPLE_ANS=0 (vigente) -> 50
+    const rows = [
+      optionRow('r1', 'c5_tiempo_respuesta', 'MENOS_2H'),
+      optionRow('r2', 'c5_tiempo_respuesta', 'NO_CUMPLE_ANS'),
+    ];
+    expect(computeIag(rows)).toMatchObject({ value: 50, respondents: 2 });
   });
 
   it('devuelve null sin datos', () => {

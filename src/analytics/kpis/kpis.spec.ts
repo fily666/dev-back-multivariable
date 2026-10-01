@@ -288,22 +288,38 @@ describe('countSingleOptions', () => {
 });
 
 describe('buildResponseTimeDistribution', () => {
-  it('conserva el orden temporal del instrumento e incluye los tramos vacíos', () => {
+  it('conserva el orden del instrumento e incluye las opciones vacías', () => {
     const rows = [
-      option('r1', 'c5_tiempo_respuesta', 'MENOS_2H'),
-      option('r2', 'c5_tiempo_respuesta', 'MAS_3_DIAS'),
+      option('r1', 'c5_tiempo_respuesta', 'SUPERA_ANS'),
+      option('r2', 'c5_tiempo_respuesta', 'NO_CUMPLE_ANS'),
     ];
     const dist = buildResponseTimeDistribution(rows);
 
     expect(dist.map((row) => row.value)).toEqual([
-      'MENOS_2H',
-      'MISMO_DIA',
-      'H24',
-      'H48',
-      'MAS_3_DIAS',
+      'SUPERA_ANS',
+      'CUMPLE_ANS',
+      'CUMPLE_PARCIAL_ANS',
+      'NO_CUMPLE_ANS',
+      'NO_CONOCE_ANS',
     ]);
-    expect(dist.find((row) => row.value === 'MISMO_DIA')?.count).toBe(0);
-    expect(dist.find((row) => row.value === 'MENOS_2H')?.share).toBe(50);
+    expect(dist.find((row) => row.value === 'CUMPLE_ANS')?.count).toBe(0);
+    expect(dist.find((row) => row.value === 'SUPERA_ANS')?.share).toBe(50);
+  });
+
+  it('deja fuera los tramos de horas del instrumento anterior', () => {
+    const rows = [
+      option('r1', 'c5_tiempo_respuesta', 'CUMPLE_ANS'),
+      option('r2', 'c5_tiempo_respuesta', 'MENOS_2H'),
+      option('r3', 'c5_tiempo_respuesta', 'MAS_3_DIAS'),
+    ];
+    const dist = buildResponseTimeDistribution(rows);
+
+    expect(dist.some((row) => row.value === 'MENOS_2H')).toBe(false);
+    // El 100% es sobre las respuestas vigentes, no sobre las tres.
+    expect(dist.find((row) => row.value === 'CUMPLE_ANS')).toMatchObject({
+      count: 1,
+      share: 100,
+    });
   });
 });
 
