@@ -12,6 +12,9 @@ export class ResponsesRepository {
     const scope = {
       ...(filters.campaignId ? { campaignId: filters.campaignId } : {}),
       ...(filters.ownArea ? { ownArea: filters.ownArea } : {}),
+      ...(filters.respondentRole
+        ? { respondentRole: filters.respondentRole }
+        : {}),
     };
 
     const [completed, started, durations] = await Promise.all([
@@ -84,7 +87,8 @@ export class ResponsesRepository {
    *
    * Solo se honra `campaignId`. `from`/`to` cortan por `submittedAt`, que los borradores no
    * tienen, así que aplicarlos borraría justo lo que se quiere ver; frecuencia y tipo de
-   * interacción dependen de lo que se respondió, y el corte por área ya viene en `byArea`.
+   * interacción dependen de lo que se respondió, y los cortes por área y por cargo ya vienen
+   * en `byArea` y `byRole`.
    */
   async fetchMonitoringRows(filters: AnalyticsFilters) {
     return this.prisma.surveyResponse.findMany({
@@ -110,13 +114,57 @@ export class ResponsesRepository {
     });
   }
 
-  /** Áreas de origen con su conteo de respuestas, para el KPI 20. */
+  /**
+   * Las preguntas 0-10 activas, por área o globales, en el orden del instrumento: primero el
+   * del componente y después el de la pregunta.
+   */
+  async fetchScaleQuestions() {
+    return this.prisma.question.findMany({
+      where: { active: true, type: { in: ['SCALE_0_10', 'MATRIX_AREA'] } },
+      orderBy: [{ component: { sortOrder: 'asc' } }, { sortOrder: 'asc' }],
+      select: {
+        code: true,
+        label: true,
+        componentId: true,
+        sortOrder: true,
+        component: { select: { title: true, sortOrder: true } },
+      },
+    });
+  }
+
+  /** Opciones estáticas de un conjunto de preguntas, en su orden, para las etiquetas. */
+  async fetchQuestionOptions(questionCodes: readonly string[]) {
+    return this.prisma.questionOption.findMany({
+      where: { questionCode: { in: [...questionCodes] } },
+      orderBy: [{ questionCode: 'asc' }, { sortOrder: 'asc' }],
+      select: { questionCode: true, value: true, label: true },
+    });
+  }
+
+  /** Las opciones tipo "Otra: ____", que exigen que el encuestado escriba cuál. */
+  async fetchTextOptions() {
+    return this.prisma.questionOption.findMany({
+      where: { allowsText: true },
+      select: { questionCode: true, value: true },
+    });
+  }
+
+  /**
+   * Áreas de origen con su conteo de respuestas, para el KPI 20.
+   *
+   * Este conteo decide qué filas pasan la cohorte, así que tiene que salir del mismo corte
+   * que sus promedios: con el filtro por cargo, contar todas las respuestas del área dejaría
+   * ver la fila de un área con un solo director bajo el respaldo de sus veinte analistas.
+   */
   async fetchRespondentsByOwnArea(filters: AnalyticsFilters) {
     const rows = await this.prisma.surveyResponse.groupBy({
       by: ['ownArea'],
       where: {
         status: 'COMPLETED',
         ...(filters.campaignId ? { campaignId: filters.campaignId } : {}),
+        ...(filters.respondentRole
+          ? { respondentRole: filters.respondentRole }
+          : {}),
       },
       _count: { _all: true },
     });
@@ -134,6 +182,9 @@ export class ResponsesRepository {
       status: 'COMPLETED' as const,
       ...(filters.campaignId ? { campaignId: filters.campaignId } : {}),
       ...(filters.ownArea ? { ownArea: filters.ownArea } : {}),
+      ...(filters.respondentRole
+        ? { respondentRole: filters.respondentRole }
+        : {}),
     };
 
     const [total, rows] = await Promise.all([

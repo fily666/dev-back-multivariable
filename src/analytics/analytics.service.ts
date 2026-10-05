@@ -31,6 +31,19 @@ import {
   countSingleOptions,
 } from './kpis/distribution.kpi';
 import { buildMonitoring } from './kpis/monitoring.kpi';
+import { buildItemStats } from './kpis/items.kpi';
+import { buildRoleIndices } from './kpis/roles.kpi';
+import { buildInfluence, type RawInfluenceLevel } from './kpis/influence.kpi';
+import {
+  NETWORK_OPTION_CODES,
+  NETWORK_QUESTION_CODES,
+  buildNetwork,
+} from './kpis/network.kpi';
+import {
+  OPEN_ANSWER_CODE,
+  QUALITY_COMPONENT_IDS,
+  buildQuality,
+} from './kpis/quality.kpi';
 import type {
   AnalyticsEnvelope,
   RawAnswerRow,
@@ -38,9 +51,15 @@ import type {
 import type {
   AnalyticsFilters,
   IndicatorsPayload,
+  IndicesByRolePayload,
+  InfluenceLevel,
+  InfluencePayload,
+  ItemsPayload,
   MonitoringPayload,
+  NetworkPayload,
   OverviewCards,
   QualitativePayload,
+  QualityPayload,
   RadarPoint,
 } from './dto/analytics.dto';
 
@@ -88,7 +107,12 @@ export class AnalyticsService {
         filters,
       ),
       this.responses.fetchCompletionStats(filters),
-      this.responses.fetchPopulation(filters.ownArea),
+      // Con el corte por cargo no hay denominador: el headcount está por área, no por cargo,
+      // y dividir los directores que respondieron entre toda la plantilla daría una tasa
+      // falsa. Sin población, la tasa sale en null y el panel muestra "sin definir".
+      filters.respondentRole
+        ? Promise.resolve(null)
+        : this.responses.fetchPopulation(filters.ownArea),
       this.responses.fetchAreas(),
       this.thresholds.getBands(),
       this.weights.getWeights(),
@@ -428,6 +452,185 @@ export class AnalyticsService {
       rows: filtered.rows,
       suppressed: filtered.suppressed,
     });
+  }
+
+  /** KPI 32: quién mueve a quién, por área y por gestión, con su plano de motricidad. */
+  async getInfluence(
+    filters: AnalyticsFilters,
+  ): Promise<AnalyticsEnvelope<InfluencePayload>> {
+    const [rows, areas] = await Promise.all([
+      this.answers.fetchAnswers(RELATIONSHIP_QUESTION_CODES, filters),
+      this.responses.fetchAreas(),
+    ]);
+
+    const levels = buildInfluence(
+      rows,
+      areas.map((area) => ({
+        code: area.code,
+        name: area.name,
+        groupCode: area.procesoCode,
+        groupName: area.proceso?.name ?? null,
+      })),
+    );
+    const min = this.minCohortSize;
+
+    // La cohorte va por par, como en la matriz del mapa: una relación que sostienen menos
+    // personas que el umbral no se dibuja, ni su fuerza ni su IREL. Cada IREL de nodo se
+    // suprime por su lado: el recibido por quienes evalúan, el otorgado por quienes evaluaron.
+    //
+    // La motricidad y la dependencia sí suman todas las relaciones, también las ocultas, como
+    // ya lo hace el grado ponderado del KPI 10: sin ellas, un área pequeña parecería autónoma
+    // solo porque sus pares no alcanzan la cohorte. Dicen con cuántas áreas trabaja y con qué
+    // intensidad, nunca qué nota les dio. Si la organización decide que eso también debe
+    // esperar a la cohorte, el corte va en `sumOf` de `buildInfluenceLevel`.
+    const publish = (level: RawInfluenceLevel): InfluenceLevel => {
+      const edges = filterCohortRows(
+        level.edges,
+        min,
+        (edge) => edge.respondents,
+      );
+      return {
+        ...level,
+        edges: edges.rows,
+        suppressedEdges: edges.suppressed,
+        nodes: level.nodes.map((node) => ({
+          ...node,
+          irelReceived: node.receivedFrom >= min ? node.irelReceived : null,
+          irelGranted: node.grantedBy >= min ? node.irelGranted : null,
+        })),
+      };
+    };
+
+    return applyCohort(this.countRespondents(rows), min, {
+      areas: publish(levels.areas),
+      gestiones: publish(levels.gestiones),
+    });
+  }
+
+  /** Cada afirmación 0-10 por separado: promedio, dispersión, consenso y reparto de notas. */
+  async getItems(
+    filters: AnalyticsFilters,
+  ): Promise<AnalyticsEnvelope<ItemsPayload>> {
+    const questions = await this.responses.fetchScaleQuestions();
+    const rows = await this.answers.fetchAnswers(
+      questions.map((question) => question.code),
+      filters,
+    );
+
+    return applyCohort(this.countRespondents(rows), this.minCohortSize, {
+      items: buildItemStats(rows, questions),
+    });
+  }
+
+  /** Los indicadores vistos desde cada nivel de cargo y desde cada grupo de niveles. */
+  async getIndicesByRole(
+    filters: AnalyticsFilters,
+  ): Promise<AnalyticsEnvelope<IndicesByRolePayload>> {
+    const [rows, weights] = await Promise.all([
+      this.answers.fetchAnswers(
+        [...ALL_INDICATOR_CODES, ...NPS_CODES],
+        filters,
+      ),
+      this.weights.getWeights(),
+    ]);
+
+    const { roles, groups } = buildRoleIndices(rows, weights);
+    const min = this.minCohortSize;
+
+    // Cada fila se suprime por separado, como las de área: en una organización de este
+    // tamaño un cargo puede tener una sola persona, y su fila sería su respuesta.
+    const keptRoles = filterCohortRows(roles, min, (row) => row.respondents);
+    const keptGroups = filterCohortRows(groups, min, (row) => row.respondents);
+
+    return applyCohort(this.countRespondents(rows), min, {
+      roles: keptRoles.rows,
+      suppressedRoles: keptRoles.suppressed,
+      groups: keptGroups.rows,
+      suppressedGroups: keptGroups.suppressed,
+    });
+  }
+
+  /** Quién trabaja con quién, con qué frecuencia, para qué, y quién quedó fuera. */
+  async getNetwork(
+    filters: AnalyticsFilters,
+  ): Promise<AnalyticsEnvelope<NetworkPayload>> {
+    const [rows, areas, options] = await Promise.all([
+      this.answers.fetchAnswers(NETWORK_QUESTION_CODES, filters),
+      this.responses.fetchAreas(),
+      this.responses.fetchQuestionOptions(NETWORK_OPTION_CODES),
+    ]);
+
+    const network = buildNetwork({ rows, areas, options });
+    const min = this.minCohortSize;
+
+    // El IREL de cada área lo sostienen quienes la evalúan, así que se suprime por área,
+    // como el ranking del mapa: el total del corte puede ser grande y el área tener tres.
+    const importance = filterCohortRows(
+      network.importance,
+      min,
+      (row) => row.respondents,
+    );
+
+    return applyCohort(this.countRespondents(rows), min, {
+      ...network,
+      importance: importance.rows,
+    });
+  }
+
+  /** Qué tanto se puede confiar en el corte: velocidad, notas repetidas y texto escrito. */
+  async getQuality(
+    filters: AnalyticsFilters,
+  ): Promise<AnalyticsEnvelope<QualityPayload>> {
+    const [responses, questions, components, textOptions] = await Promise.all([
+      this.answers.fetchCompletedResponses(filters),
+      this.responses.fetchScaleQuestions(),
+      this.responses.fetchComponents(),
+      this.responses.fetchTextOptions(),
+    ]);
+
+    const scaleItems = questions.filter((question) =>
+      QUALITY_COMPONENT_IDS.includes(question.componentId),
+    );
+    const [scaleRows, textAnswers] = await Promise.all([
+      this.answers.fetchAnswers(
+        scaleItems.map((question) => question.code),
+        filters,
+      ),
+      this.answers.fetchTextAnswers(
+        [
+          OPEN_ANSWER_CODE,
+          ...new Set(textOptions.map((option) => option.questionCode)),
+        ],
+        filters,
+      ),
+    ]);
+
+    const data = buildQuality({
+      responses,
+      scaleRows,
+      scaleItems,
+      components,
+      textAnswers,
+      textOptions,
+    });
+
+    // Sin applyCohort, como el monitoreo. Esto describe CÓMO se respondió —en cuánto
+    // tiempo, con cuántas notas repetidas, si se escribió algo—, nunca QUÉ se respondió.
+    // Suprimirlo escondería justo la advertencia que más importa en un corte chico: que la
+    // mitad de sus respuestas se dieron sin leer.
+    //
+    // Ojo con lo que sí cambia: en un corte de una o dos personas, «1 en línea recta» dice
+    // algo de alguien concreto (que contestó sin leer), aunque no qué nota puso. Si la
+    // organización decide que eso también debe esperar a la cohorte, el corte va aquí.
+    return {
+      data,
+      meta: {
+        n: data.completed,
+        insufficient: false,
+        minCohortSize: this.minCohortSize,
+        generatedAt: new Date().toISOString(),
+      },
+    };
   }
 
   async getResponsesPage(filters: AnalyticsFilters, page = 1, pageSize = 50) {

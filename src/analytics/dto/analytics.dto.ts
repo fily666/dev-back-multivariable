@@ -8,6 +8,8 @@ import type {
 export interface AnalyticsFilters {
   campaignId?: string;
   ownArea?: string;
+  /** Nivel de cargo de quien responde, uno de `RESPONDENT_ROLES`. */
+  respondentRole?: string;
   frecuencia?: string;
   tipoInteraccion?: string;
   from?: string;
@@ -71,6 +73,72 @@ export interface RelationshipMap {
   cells: RelationshipCell[];
   /** Grado ponderado por área, para dimensionar los nodos. */
   degrees: { areaCode: string; inbound: number; outbound: number }[];
+}
+
+/**
+ * KPI 32: zona de un nodo en el plano de motricidad y dependencia. Motriz: mueve más de lo
+ * típico y depende menos; de enlace: las dos por encima; dependiente: la mueven más de lo
+ * que mueve; autónoma: las dos por debajo.
+ */
+export type InfluenceZone = 'MOTRIZ' | 'ENLACE' | 'DEPENDIENTE' | 'AUTONOMA';
+
+/** Un área, o una gestión, en la red de influencias. */
+export interface InfluenceNode {
+  code: string;
+  name: string;
+  /** La gestión del área; `null` en el nivel de gestiones. */
+  groupCode: string | null;
+  groupName: string | null;
+  /** Suma de la fuerza (1-3) de las relaciones en que otras dependen de esta. */
+  motricidad: number;
+  /** Suma de la fuerza de las relaciones en que esta depende de otras. */
+  dependencia: number;
+  /** Nodos distintos que dependen de este. */
+  clients: number;
+  /** Nodos distintos de los que este depende. */
+  providers: number;
+  zone: InfluenceZone;
+  /** Personas que la evalúan. */
+  receivedFrom: number;
+  /** Personas de ella que evaluaron a otras. Con cero, su dependencia no se conoce. */
+  grantedBy: number;
+  /** IREL que recibe; `null` bajo la cohorte. */
+  irelReceived: number | null;
+  /** IREL que otorga; `null` bajo la cohorte. */
+  irelGranted: number | null;
+}
+
+/** «`from` mueve a `to`»: la gente de `to` trabaja con `from` y depende de lo que entrega. */
+export interface InfluenceEdge {
+  from: string;
+  to: string;
+  /** 1 débil, 2 media, 3 fuerte: tercios del peso dentro del nivel. */
+  strength: 1 | 2 | 3;
+  /** Personas × frecuencia de interacción, como el peso del mapa. */
+  weight: number;
+  respondents: number;
+  /** IREL que `to` le da a `from`. */
+  irel: number | null;
+}
+
+export interface InfluenceLevel {
+  /** Ordenados por zona y, dentro de cada una, de más a menos motriz. */
+  nodes: InfluenceNode[];
+  /** Solo las relaciones que alcanzan la cohorte. */
+  edges: InfluenceEdge[];
+  suppressedEdges: number;
+  /** Relaciones entre áreas del mismo nodo (de la misma gestión), que no se dibujan. */
+  internalPairs: number;
+  /** La media que corta los dos ejes del plano: es la misma para los dos. */
+  mean: number;
+  /** Pesos desde los que una relación es media o fuerte; `null` si todas pesan igual. */
+  thresholds: { media: number; fuerte: number } | null;
+}
+
+/** KPI 32: la red de influencias, por área y por gestión. */
+export interface InfluencePayload {
+  areas: InfluenceLevel;
+  gestiones: InfluenceLevel;
 }
 
 /** KPI 11: brecha entre lo que un área recibe y lo que otorga. */
@@ -260,4 +328,146 @@ export interface MonitoringRoleRow {
   label: string;
   completed: number;
   drafts: number;
+}
+
+/**
+ * Una afirmación 0-10 del instrumento, leída sola. Los índices promedian cinco ítems y
+ * esconden cuál de ellos arrastra el resultado y si la nota es un acuerdo o un promedio de
+ * opiniones opuestas.
+ */
+export interface ItemStat {
+  /** Código de la pregunta. */
+  code: string;
+  label: string;
+  componentId: number;
+  componentTitle: string;
+  /**
+   * Índice al que alimenta, el primero en el orden del IMC; `NPS_INT` para la pregunta de
+   * recomendación. Vacío si la pregunta aún no alimenta ningún índice.
+   */
+  indicatorCode: string;
+  /** Respuestas distintas con al menos un valor. */
+  respondents: number;
+  /** Valores contados. Las preguntas por área aportan uno por cada área evaluada. */
+  observations: number;
+  /** Promedio en la escala 0-10, con dos decimales. */
+  mean: number | null;
+  /** El promedio llevado a 0-100 como los índices, con un decimal. */
+  index: number | null;
+  /** Desviación estándar poblacional en la escala 0-10, con dos decimales. */
+  sd: number | null;
+  /** 0-100: 100 es que todos dieron la misma nota; 0, la dispersión máxima posible. */
+  consensus: number | null;
+  /** Cuántas veces se dio cada nota: 11 posiciones, de la nota 0 a la 10. */
+  distribution: number[];
+}
+
+export interface ItemsPayload {
+  items: ItemStat[];
+}
+
+/** Los indicadores vistos desde un nivel de cargo, o desde un grupo de niveles. */
+export interface RoleIndicesRow {
+  /** Código del cargo, o del grupo en las filas de grupo. */
+  key: string;
+  label: string;
+  respondents: number;
+  /** Los 10 indicadores, por código. */
+  indicators: Record<string, number | null>;
+  /** IMC con los pesos vigentes. */
+  imc: number | null;
+  nps: number | null;
+}
+
+export type RoleGroupIndicesRow = RoleIndicesRow & { roles: string[] };
+
+export interface IndicesByRolePayload {
+  /** Los cargos en el orden de `RESPONDENT_ROLES`, solo los que alcanzan la cohorte. */
+  roles: RoleIndicesRow[];
+  /** Cargos con al menos una respuesta que no alcanzan la cohorte. */
+  suppressedRoles: number;
+  /** Los grupos de `ROLE_GROUPS`, en su orden, solo los que alcanzan la cohorte. */
+  groups: RoleGroupIndicesRow[];
+  suppressedGroups: number;
+}
+
+/** Cuánto se busca a un área: cuántos la mencionan y cuántos la tienen como relación principal. */
+export interface NetworkDemandRow {
+  areaCode: string;
+  areaName: string;
+  procesoName: string | null;
+  /** Encuestados que la marcaron entre las áreas con las que interactúan. */
+  mentions: number;
+  /** Encuestados que la marcaron como su relación principal. */
+  principal: number;
+  /** menciones / encuestados de la pregunta, en %, con un decimal. */
+  mentionShare: number;
+}
+
+/** Un área que se busca, cruzada con cómo la califican quienes trabajan con ella. */
+export interface NetworkImportanceRow {
+  areaCode: string;
+  areaName: string;
+  mentions: number;
+  /** IREL que el área RECIBE. */
+  irel: number;
+  /** Encuestados que sostienen ese IREL. */
+  respondents: number;
+}
+
+/** Cuántas veces se eligió un área como la de mayor valor y como la que debe fortalecerse. */
+export interface NetworkValueRow {
+  areaCode: string;
+  areaName: string;
+  value: number;
+  strengthen: number;
+}
+
+export interface NetworkInnovation {
+  /** Respuestas que contestaron la 8.1. */
+  respondents: number;
+  /** De ellas, las que marcaron NINGUNA, en %, con un decimal. */
+  noneShare: number;
+  /** Áreas evaluables que aparecen en al menos una iniciativa con otra área. */
+  connectedAreas: number;
+  /** Áreas evaluables que no aparecen en ninguna. */
+  isolated: { areaCode: string; areaName: string }[];
+}
+
+/** Quién trabaja con quién, con qué frecuencia y para qué (componentes 1, 8 y 10). */
+export interface NetworkPayload {
+  /** Respuestas que contestaron con qué áreas interactúan. */
+  respondents: number;
+  /** Todas las áreas evaluables, con ceros, de la más a la menos mencionada. */
+  demand: NetworkDemandRow[];
+  importance: NetworkImportanceRow[];
+  /** Frecuencia de interacción en el orden de la escala, con ceros. */
+  frequency: DistributionRow[];
+  /** Tipos de interacción, de más a menos marcados; el % es sobre encuestados. */
+  interactionTypes: CountedOption[];
+  valueVsStrengthen: NetworkValueRow[];
+  innovation: NetworkInnovation;
+}
+
+/**
+ * Qué tanto se puede confiar en el corte: señales de respuestas dadas sin leer. Habla de
+ * cómo se respondió, no de qué se respondió.
+ */
+export interface QualityPayload {
+  completed: number;
+  /** Completadas en menos de `thresholdSeconds`; el % es sobre las que tienen duración. */
+  speeders: { thresholdSeconds: number; count: number; share: number | null };
+  /** Completadas con todos sus ítems globales 0-10 idénticos (al menos `minItems`). */
+  straightLining: { count: number; share: number | null; minItems: number };
+  /** Por componente 3-8: respuestas con la misma nota en todos sus ítems. */
+  flatComponents: {
+    componentId: number;
+    title: string;
+    count: number;
+    share: number | null;
+  }[];
+  /** Completadas que escribieron algo en la pregunta abierta final. */
+  openAnswers: { count: number; share: number | null };
+  /** Respuestas que eligieron "Otra/Otro" y escribieron cuál. */
+  otherSpecified: number;
 }

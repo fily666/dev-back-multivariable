@@ -8,7 +8,11 @@ import type {
 
 type Labels = Map<string, string>;
 
-function share(count: number, total: number): number {
+/**
+ * Porcentaje con un decimal y 0 sin denominador. Es para repartos de opciones; donde un 0%
+ * se leería como dato, `percent` del monitoreo devuelve `null`.
+ */
+export function share(count: number, total: number): number {
   return total === 0 ? 0 : Math.round((count / total) * 1000) / 10;
 }
 

@@ -140,7 +140,7 @@ function nextDay(date: string): string {
 }
 
 /** Porcentaje con un decimal; `null` sin denominador, nunca un 0% inventado. */
-function percent(part: number, whole: number | null): number | null {
+export function percent(part: number, whole: number | null): number | null {
   if (whole === null || whole === 0) return null;
   return Math.round((part / whole) * 1000) / 10;
 }

@@ -47,9 +47,24 @@ export class AnalyticsController {
     return this.analytics.getComponents(filters);
   }
 
+  @Get('items')
+  getItems(@Query() filters: AnalyticsFiltersDto) {
+    return this.analytics.getItems(filters);
+  }
+
   @Get('relationship-map')
   getRelationshipMap(@Query() filters: AnalyticsFiltersDto) {
     return this.analytics.getRelationshipMap(filters);
+  }
+
+  @Get('influence')
+  getInfluence(@Query() filters: AnalyticsFiltersDto) {
+    return this.analytics.getInfluence(filters);
+  }
+
+  @Get('network')
+  getNetwork(@Query() filters: AnalyticsFiltersDto) {
+    return this.analytics.getNetwork(filters);
   }
 
   @Get('nps')
@@ -62,6 +77,11 @@ export class AnalyticsController {
     return this.analytics.getIndicesByArea(filters);
   }
 
+  @Get('indices-by-role')
+  getIndicesByRole(@Query() filters: AnalyticsFiltersDto) {
+    return this.analytics.getIndicesByRole(filters);
+  }
+
   @Get('qualitative')
   getQualitative(@Query() filters: AnalyticsFiltersDto) {
     return this.analytics.getQualitative(filters);
@@ -70,6 +90,12 @@ export class AnalyticsController {
   @Get('areas/:code')
   getArea(@Param('code') code: string, @Query() filters: AnalyticsFiltersDto) {
     return this.analytics.getAreaDetail(code, filters);
+  }
+
+  /** Calidad del corte. No pasa por la cohorte mínima: ver getQuality. */
+  @Get('quality')
+  getQuality(@Query() filters: AnalyticsFiltersDto) {
+    return this.analytics.getQuality(filters);
   }
 
   /** Participación en vivo. No pasa por la cohorte mínima: ver getMonitoring. */

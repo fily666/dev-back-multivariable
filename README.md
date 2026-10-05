@@ -50,7 +50,7 @@ sin duplicar nada.
 | `npm run build` | `nest build` → `dist/` |
 | `npm run typecheck` | `tsc --noEmit` en **los tres** ámbitos: app, seed y `api/` |
 | `npm run lint` | ESLint con `--fix` sobre `src/` y `prisma/` |
-| `npm test` | Jest — 182 tests, sin base de datos |
+| `npm test` | Jest — 216 tests, sin base de datos |
 | `npm run test:cov` | Cobertura en `coverage/` |
 | `npm run prisma:generate` | Regenera el cliente |
 | `npm run prisma:deploy` | `prisma migrate deploy` |
@@ -74,7 +74,7 @@ src/
 │   └── rules/           8 reglas de validación del instrumento
 ├── analytics/           el panel
 │   ├── indicators/      10 índices + IMC compuesto + NPS (funciones puras)
-│   ├── kpis/            distribuciones, mapa de relacionamiento y monitoreo
+│   ├── kpis/            distribuciones, mapa de relacionamiento, monitoreo, ítems, cargos, red y calidad
 │   ├── repositories/    acceso a datos, separado del cálculo
 │   ├── cohort.util.ts   regla de anonimato
 │   ├── thresholds.service.ts / weights.service.ts
@@ -141,11 +141,16 @@ diferencia de latencia.
 | `GET` | `/admin/overview` | Titulares: IMC, participación, totales |
 | `GET` | `/admin/indicators` | Los 10 índices + IMC, con su banda de semaforización |
 | `GET` | `/admin/components` | Promedios por componente |
+| `GET` | `/admin/items` | Cada afirmación 0-10 por separado, en el orden del instrumento: promedio, índice, desviación, consenso, reparto de notas 0–10 y el índice al que alimenta |
 | `GET` | `/admin/relationship-map` | Matriz área-evaluadora × área-evaluada |
+| `GET` | `/admin/influence` | Quién mueve a quién (KPI 32), por área y por gestión: motricidad, dependencia y zona de cada nodo, IREL recibido y otorgado (con cohorte por lado) y las relaciones con su fuerza 1-3, solo las que alcanzan la cohorte |
+| `GET` | `/admin/network` | La red declarada: demanda por área (menciones y relación principal), menciones contra IREL recibido, frecuencia, tipos de interacción, valor contra fortalecer y áreas aisladas de la innovación |
 | `GET` | `/admin/nps` | NPS interno con promotores / pasivos / detractores |
 | `GET` | `/admin/indices-by-area` | Índices desglosados por área |
+| `GET` | `/admin/indices-by-role` | Índices, IMC y NPS por cargo y por nivel (Dirección, Mandos medios, Equipos), con cohorte por fila |
 | `GET` | `/admin/qualitative` | Respuestas abiertas, agrupables por tema |
 | `GET` | `/admin/areas/:code` | Detalle de un área |
+| `GET` | `/admin/quality` | Calidad del corte: apresurados (< 300 s), respuestas en línea recta, componentes planos, abiertas escritas y «Otro» especificado. **Sin cohorte mínima** |
 | `GET` | `/admin/monitoring` | Participación en vivo: totales, serie diaria, mapa de calor día × hora, embudo por componente, abandono, duraciones, por área y por cargo. Solo honra `campaignId`; **sin cohorte mínima** |
 | `GET` | `/admin/responses` | Listado paginado (`page`, `pageSize` ≤ 200) |
 | `GET` | `/admin/weights` | Pesos del IMC |
@@ -157,8 +162,11 @@ diferencia de latencia.
 | `PATCH` | `/admin/campaigns/:id/close` | Cierra la campaña y congela su corte — **auditado** |
 
 **Filtros comunes** (`AnalyticsFiltersDto`), todos opcionales: `campaignId` (UUID),
-`ownArea`, `frecuencia` (`DIARIA` … `ESPORADICA`), `tipoInteraccion` (`OPERATIVA`,
-`TACTICA`, `ESTRATEGICA`, `COMERCIAL`, `SOPORTE`), `from` y `to` (ISO 8601).
+`ownArea`, `respondentRole` (uno de los 7 cargos: `DIRECTOR` … `ANALISTA`), `frecuencia`
+(`DIARIA` … `ESPORADICA`), `tipoInteraccion` (`OPERATIVA`, `TACTICA`, `ESTRATEGICA`,
+`COMERCIAL`, `SOPORTE`), `from` y `to` (ISO 8601). Con `respondentRole`, la participación de
+`/admin/overview` sale con `population` y `rate` en `null`: el headcount está por área, no
+por cargo, y la tasa tendría un denominador falso.
 
 **Toda respuesta analítica viene envuelta** en `AnalyticsEnvelope`:
 
@@ -174,10 +182,13 @@ diferencia de latencia.
 }
 ```
 
-La única excepción es `/admin/monitoring`, que devuelve siempre `insufficient: false`.
-Reporta participación —conteos y tiempos—, nunca opiniones: la regla de cohorte protege
-*qué* respondió alguien, no *que* respondió. Suprimirlo lo dejaría en blanco justo con las
-primeras respuestas, cuando más se necesita. Sus días y horas se cortan en `America/Bogota`.
+Las dos excepciones son `/admin/monitoring` y `/admin/quality`, que devuelven siempre
+`insufficient: false`. El monitoreo reporta participación —conteos y tiempos—, nunca
+opiniones: la regla de cohorte protege *qué* respondió alguien, no *que* respondió.
+Suprimirlo lo dejaría en blanco justo con las primeras respuestas, cuando más se necesita.
+Sus días y horas se cortan en `America/Bogota`. La calidad describe *cómo* se respondió
+—velocidad, notas repetidas, si se escribió algo—, y suprimirla escondería la advertencia
+que más importa en un corte chico.
 
 Se audita lo que cambia datos o los saca del sistema: los pesos del IMC porque alteran el KPI
 titular de la organización, y las exportaciones porque son datos de percepción de personas
@@ -246,7 +257,7 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 
 ## Tests
 
-182 tests en 9 suites, **sin base de datos** — corren en ~2 s:
+216 tests en 13 suites, **sin base de datos** — corren en ~2 s:
 
 | Suite | Tests | Qué cubre |
 |---|---|---|
@@ -255,9 +266,13 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 | `analytics/kpis/monitoring.spec.ts` | 22 | El monitoreo: cortes por día y hora de Bogotá, serie con ceros y tope de 120 días, embudo, abandono, tramos de duración |
 | `analytics/kpis/kpis.spec.ts` | 21 | Distribuciones y mapa de relacionamiento |
 | `prisma/catalog.spec.ts` | 21 | La transcripción del PDF: los conteos por componente salen del documento, no del código |
+| `analytics/kpis/items.spec.ts` | 13 | Cada ítem 0-10: media, desviación poblacional, consenso, reparto de notas, índice al que alimenta y orden del instrumento |
 | `export/csv-cell.util.spec.ts` | 12 | Neutralización de fórmulas en las exportaciones |
 | `auth/auth.service.spec.ts` | 10 | Login por token, incluida la comparación de tiempo constante |
+| `analytics/kpis/network.spec.ts` | 9 | La red: demanda con ceros, relación principal, frecuencia en orden de escala, tipos sobre encuestados, valor contra fortalecer, áreas aisladas sin auto-aristas |
+| `analytics/kpis/quality.spec.ts` | 7 | Calidad del corte: el límite de 300 s, línea recta con 10 / 9 / una distinta, componentes planos, texto de puros espacios |
 | `analytics/cohort.util.spec.ts` | 7 | La regla de cohorte mínima |
+| `analytics/kpis/roles.spec.ts` | 5 | Índices por cargo y por nivel, cargos sin declarar fuera, y qué cuenta como suprimido |
 | `survey/survey.service.spec.ts` | 5 | Resolución del catálogo |
 
 El cálculo a mano en los tests de indicadores es lo que sustituye a la validación contra
@@ -302,4 +317,4 @@ npm run typecheck && npm run lint && npm test && npm run build
 npx prisma validate
 ```
 
-Estado al 5-oct-2026: los cinco pasan — 182/182 tests, schema válido.
+Estado al 5-oct-2026: los cinco pasan — 216/216 tests, schema válido.

@@ -10,6 +10,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { RESPONDENT_ROLE_VALUES } from '../../common/constants';
 
 const FRECUENCIAS = [
   'DIARIA',
@@ -29,6 +30,10 @@ export class AnalyticsFiltersDto {
   @IsString()
   @MaxLength(64)
   ownArea?: string;
+
+  @IsOptional()
+  @IsIn(RESPONDENT_ROLE_VALUES)
+  respondentRole?: string;
 
   @IsOptional()
   @IsIn(FRECUENCIAS)

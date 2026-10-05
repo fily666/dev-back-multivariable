@@ -32,13 +32,14 @@ export class AnswersRepository {
         valueNumber: true,
         valueOption: true,
         valueOptions: true,
-        response: { select: { ownArea: true } },
+        response: { select: { ownArea: true, respondentRole: true } },
       },
     });
 
     return rows.map((row) => ({
       responseId: row.responseId,
       ownArea: row.response.ownArea,
+      respondentRole: row.response.respondentRole,
       targetArea: row.targetArea,
       questionCode: row.questionCode,
       valueNumber: row.valueNumber === null ? null : Number(row.valueNumber),
@@ -70,6 +71,45 @@ export class AnswersRepository {
     });
   }
 
+  /**
+   * Respuestas que traen texto, con la opción a la que acompañan. Para la calidad del corte
+   * solo importa si se escribió algo, así que no hay tope: un conteo truncado a 500 sería
+   * un conteo falso.
+   */
+  async fetchTextAnswers(
+    questionCodes: readonly string[],
+    filters: AnalyticsFilters,
+  ) {
+    return this.prisma.answer.findMany({
+      where: {
+        questionCode: { in: [...questionCodes] },
+        valueText: { not: null },
+        response: this.responseWhere(filters),
+      },
+      select: {
+        responseId: true,
+        questionCode: true,
+        valueOption: true,
+        valueOptions: true,
+        valueText: true,
+      },
+    });
+  }
+
+  /**
+   * Las respuestas completadas del corte con su duración.
+   *
+   * Vive aquí y no en `ResponsesRepository` porque tiene que usar el mismo `responseWhere`
+   * que las respuestas: es el denominador de la calidad, y si honrara menos filtros que sus
+   * numeradores, un corte por fecha o por frecuencia daría porcentajes sobre otra población.
+   */
+  async fetchCompletedResponses(filters: AnalyticsFilters) {
+    return this.prisma.surveyResponse.findMany({
+      where: this.responseWhere(filters),
+      select: { id: true, durationSeconds: true },
+    });
+  }
+
   async updateTheme(answerId: bigint, theme: string | null) {
     return this.prisma.answer.update({
       where: { id: answerId },
@@ -91,6 +131,8 @@ export class AnswersRepository {
 
     if (filters.campaignId) conditions.campaignId = filters.campaignId;
     if (filters.ownArea) conditions.ownArea = filters.ownArea;
+    if (filters.respondentRole)
+      conditions.respondentRole = filters.respondentRole;
 
     if (filters.from || filters.to) {
       conditions.submittedAt = {

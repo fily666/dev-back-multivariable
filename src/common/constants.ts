@@ -27,6 +27,28 @@ export const RESPONDENT_ROLE_VALUES: string[] = RESPONDENT_ROLES.map(
 export const RESPONDENT_ROLE_LABELS: Record<string, string> =
   Object.fromEntries(RESPONDENT_ROLES.map((role) => [role.value, role.label]));
 
+/**
+ * Los cargos agrupados en tres niveles de la jerarquía.
+ *
+ * Existen por la cohorte mínima: en una organización de este tamaño hay pocos directores y
+ * pocos heads, así que la fila de cada cargo suele quedar suprimida y la lectura "cómo se ve
+ * la organización desde arriba y desde abajo" desaparecería entera. Sumados en su nivel
+ * alcanzan el umbral sin exponer a nadie.
+ */
+export const ROLE_GROUPS = [
+  {
+    value: 'DIRECCION',
+    label: 'Dirección',
+    roles: ['DIRECTOR', 'GERENTE', 'HEAD'],
+  },
+  {
+    value: 'MANDOS_MEDIOS',
+    label: 'Mandos medios',
+    roles: ['COORDINADOR', 'LIDER'],
+  },
+  { value: 'EQUIPOS', label: 'Equipos', roles: ['PROFESIONAL', 'ANALISTA'] },
+] as const;
+
 /** Longitud máxima del texto de una opción "Otra". */
 export const OTHER_TEXT_MAX_LENGTH = 200;
 

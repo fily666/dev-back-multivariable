@@ -12,6 +12,11 @@ export interface RawAnswerRow {
   responseId: string;
   /** Área del encuestado (1.1). `null` si aún no la declaró. */
   ownArea: string | null;
+  /**
+   * Nivel de cargo del encuestado, `null` si no lo declaró. Opcional porque solo lo leen
+   * los cortes por cargo: así las filas armadas a mano en los tests no tienen que llevarlo.
+   */
+  respondentRole?: string | null;
   /** Área evaluada, o el centinela '__GLOBAL__' para preguntas globales. */
   targetArea: string;
   questionCode: string;
