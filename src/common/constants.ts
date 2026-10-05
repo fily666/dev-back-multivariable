@@ -60,29 +60,6 @@ export const SCALE_MAX = 10;
 export const NPS_PROMOTER_MIN = 9;
 export const NPS_PASSIVE_MIN = 7;
 
-/**
- * Scores de las opciones del tiempo de respuesta percibido (C5.1), normalizados a 0-100
- * para poder mezclarlos con las escalas en el Índice de Agilidad.
- *
- * Cumplir el ANS puntúa 80, el piso de "Fortaleza" en la semaforización: cumplir lo
- * pactado es lo esperado. "No conoce el ANS / No aplica" (NO_CONOCE_ANS) no puntúa a
- * propósito: no dice nada de la agilidad, e imputarle un valor movería el índice con una
- * opinión que nadie dio.
- */
-export const RESPONSE_TIME_SCORES: Record<string, number> = {
-  SUPERA_ANS: 100,
-  CUMPLE_ANS: 80,
-  CUMPLE_PARCIAL_ANS: 50,
-  NO_CUMPLE_ANS: 0,
-  // Tramos de horas que el instrumento usó hasta el 1-oct-2026. Se conservan para que las
-  // respuestas ya enviadas no pierdan su mitad de tiempo en el IAG.
-  MENOS_2H: 100,
-  MISMO_DIA: 80,
-  H24: 60,
-  H48: 40,
-  MAS_3_DIAS: 10,
-};
-
 /** Scores de frecuencia de interacción (C1.3), normalizados a 0-100. */
 export const FREQUENCY_SCORES: Record<string, number> = {
   DIARIA: 100,

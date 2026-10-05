@@ -35,7 +35,7 @@ npm run start:dev            # http://localhost:3001/api/v1
 está en [la referencia de variables](../docs/VARIABLES-DE-ENTORNO.md#2-base-de-datos-supabase).
 
 El seed carga las 16 gestiones y sus 53 subprocesos (la distribución del 5-oct-2026), `OTRA`
-(no evaluable), los 10 componentes con su texto introductorio literal del PDF, las 46
+(no evaluable), los 10 componentes con su texto introductorio literal del PDF, las 44
 preguntas con sus opciones, los 7 pesos del IMC y las 4 bandas de semaforización. **Es
 idempotente:** se puede volver a correr sin duplicar nada, y desactiva —sin borrarlas— las
 áreas, gestiones y preguntas que salieron del catálogo.
@@ -56,6 +56,11 @@ jerárquica, dos encuestas a la carrera y una en línea recta para la vista de c
 | `npm run prisma:simulacion -- --reset` | Respalda en JSON (en la carpeta que contiene a `dev-back`), **borra todas** las respuestas y siembra; borrado y siembra en una sola transacción |
 
 Corre después del seed: las respuestas apuntan por FK a las áreas del catálogo vigente.
+
+Las 46 que hay hoy en la base se sembraron antes de retirar las dos preguntas del componente 5
+(5-oct-2026); a esas respuestas se les borraron las de las preguntas retiradas. Volver a
+correr el script da un corte equivalente, pero no idéntico: el generador ya no sortea esas
+dos preguntas y la secuencia pseudoaleatoria cambia.
 **Antes de abrir la recolección real hay que borrarlas** (`docs/limpiar-datos-de-prueba.sql`).
 
 ---
@@ -70,7 +75,7 @@ Corre después del seed: las respuestas apuntan por FK a las áreas del catálog
 | `npm run build` | `nest build` → `dist/` |
 | `npm run typecheck` | `tsc --noEmit` en **los tres** ámbitos: app, seed y `api/` |
 | `npm run lint` | ESLint con `--fix` sobre `src/` y `prisma/` |
-| `npm test` | Jest — 237 tests, sin base de datos |
+| `npm test` | Jest — 231 tests, sin base de datos |
 | `npm run test:cov` | Cobertura en `coverage/` |
 | `npm run prisma:generate` | Regenera el cliente |
 | `npm run prisma:deploy` | `prisma migrate deploy` |
@@ -110,7 +115,7 @@ src/
 un número. No conocen Prisma, ni la regla de cohorte, ni los umbrales
 ([indicator.types.ts](src/analytics/indicators/indicator.types.ts)). Por eso se pueden
 validar las fórmulas del instrumento sin levantar una base de datos, que es lo que hacen los
-45 tests de `indicators.spec.ts`.
+41 tests de `indicators.spec.ts`.
 
 **La regla de cohorte mínima vive en el orquestador, no en los indicadores.**
 [`applyCohort`](src/analytics/cohort.util.ts) envuelve toda respuesta analítica y vacía
@@ -278,14 +283,14 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 
 ## Tests
 
-237 tests en 15 suites, **sin base de datos** — corren en ~2 s:
+231 tests en 15 suites, **sin base de datos** — corren en ~2 s:
 
 | Suite | Tests | Qué cubre |
 |---|---|---|
-| `analytics/indicators/indicators.spec.ts` | 45 | Las fórmulas de los indicadores, **con cada valor esperado calculado a mano** en un comentario junto al test |
+| `analytics/indicators/indicators.spec.ts` | 41 | Las fórmulas de los indicadores, **con cada valor esperado calculado a mano** en un comentario junto al test |
 | `responses/rules/rules.spec.ts` | 39 | Las 8 reglas de validación del instrumento |
 | `analytics/kpis/monitoring.spec.ts` | 22 | El monitoreo: cortes por día y hora de Bogotá, serie con ceros y tope de 120 días, embudo, abandono, tramos de duración |
-| `analytics/kpis/kpis.spec.ts` | 21 | Distribuciones y mapa de relacionamiento |
+| `analytics/kpis/kpis.spec.ts` | 19 | Distribuciones y mapa de relacionamiento |
 | `prisma/catalog.spec.ts` | 23 | La transcripción del PDF (los conteos por componente salen del documento, no del código) y el organigrama: 16 gestiones, 53 subprocesos, en su orden |
 | `analytics/kpis/items.spec.ts` | 13 | Cada ítem 0-10: media, desviación poblacional, consenso, reparto de notas, índice al que alimenta y orden del instrumento |
 | `export/csv-cell.util.spec.ts` | 12 | Neutralización de fórmulas en las exportaciones |
@@ -341,5 +346,5 @@ npm run typecheck && npm run lint && npm test && npm run build
 npx prisma validate
 ```
 
-Estado al 5-oct-2026, tras la nueva distribución de gestiones: los cinco pasan — 237/237
-tests, schema válido.
+Estado al 5-oct-2026, tras retirar dos preguntas del componente 5: los cinco pasan —
+231/231 tests, schema válido.

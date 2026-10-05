@@ -1,5 +1,4 @@
 import {
-  IAG_SCALE_CODES,
   IINN_SCALE_CODES,
   QUESTION_CODES_BY_INDICATOR,
 } from '../indicators/question-codes.constant';
@@ -18,14 +17,14 @@ import type {
   QualityTextAnswer,
 } from './quality.kpi';
 
-const { ICOM, ISI, IINT, ICOL } = QUESTION_CODES_BY_INDICATOR;
+const { ICOM, ISI, IAG, IINT, ICOL } = QUESTION_CODES_BY_INDICATOR;
 
-/** Los 28 ítems 0-10 de los componentes 3 a 8, más uno por área del C2 y el NPS del C9. */
+/** Los 27 ítems 0-10 de los componentes 3 a 8, más uno por área del C2 y el NPS del C9. */
 const SCALE_ITEMS: QualityScaleItem[] = [
   { code: 'c2_facilidad', componentId: 2 },
   ...ICOM.map((code) => ({ code, componentId: 3 })),
   ...ISI.map((code) => ({ code, componentId: 4 })),
-  ...IAG_SCALE_CODES.map((code) => ({ code, componentId: 5 })),
+  ...IAG.map((code) => ({ code, componentId: 5 })),
   ...IINT.map((code) => ({ code, componentId: 6 })),
   ...ICOL.map((code) => ({ code, componentId: 7 })),
   ...IINN_SCALE_CODES.map((code) => ({ code, componentId: 8 })),

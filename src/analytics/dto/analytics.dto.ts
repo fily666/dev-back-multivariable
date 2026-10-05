@@ -158,7 +158,7 @@ export interface AspectMatrixRow {
   respondents: number;
 }
 
-/** KPI 13: distribución de tiempos de respuesta percibidos. */
+/** Reparto de una opción única en el orden de su escala (hoy, la frecuencia de interacción). */
 export interface DistributionRow {
   value: string;
   label: string;

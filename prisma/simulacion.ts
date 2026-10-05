@@ -11,6 +11,9 @@
  * mejor que los equipos), cada área tiene una reputación propia y cada afirmación su sesgo
  * —el reproceso sale peor que la disposición para ayudar—. Así el panel tiene algo que
  * concluir: áreas fuertes y débiles, brecha jerárquica, afirmaciones que tiran a la baja.
+ *
+ * Una parte del corte queda a medias, como en cualquier recolección: borradores que se
+ * abandonaron en distintos componentes, para que el monitoreo tenga embudo de abandono.
  */
 import { GLOBAL_AREA_CODE } from '../src/common/constants.ts';
 import { findMissingAnswers } from '../src/responses/rules/completeness.rule.ts';
@@ -22,69 +25,90 @@ import type {
 } from '../src/responses/rules/index.ts';
 import { AREAS, PROCESOS, QUESTIONS } from './catalog.ts';
 
-export const TOTAL_SIMULADAS = 46;
+export const TOTAL_SIMULADAS = 68;
+/** Cuántas de las simuladas quedan sin enviar. */
+export const INCOMPLETAS = 15;
 export const SEMILLA = 20261005;
 
 export interface RespuestaSimulada {
-  ownArea: string;
-  respondentRole: string;
+  status: 'COMPLETED' | 'DRAFT';
+  /** Id del último componente guardado: 10 en una completa, 0 si nunca guardó un paso. */
+  lastStep: number;
+  /** Nulos en un borrador que nunca guardó un paso: la identificación viaja con cada paso. */
+  ownArea: string | null;
+  respondentRole: string | null;
   startedAt: Date;
-  submittedAt: Date;
-  durationSeconds: number;
+  /** Última señal de vida: el envío en una completa, el último paso en un borrador. */
+  updatedAt: Date;
+  submittedAt: Date | null;
+  durationSeconds: number | null;
   answers: IncomingAnswer[];
 }
 
 // ============ QUIÉN RESPONDE ============
 
 /**
- * Cuántas personas responden desde cada subproceso. Concentra la participación donde están
- * los equipos grandes, como pasaría en la recolección real, y deja gestiones sin nadie: la
- * cobertura por área del monitoreo tiene que mostrar huecos. Desarrollo de software lleva
- * cinco a propósito: es el único subproceso con equipo suficiente para que alguno de sus
- * pares alcance la cohorte mínima de 4 en la matriz.
+ * Cuántas personas abren la encuesta desde cada subproceso. Concentra la participación donde
+ * están los equipos grandes, como pasaría en la recolección real, y deja subprocesos sin
+ * nadie: la cobertura por área del monitoreo tiene que mostrar huecos. Desarrollo de software
+ * lleva siete a propósito: es el subproceso con equipo suficiente para que alguno de sus
+ * pares alcance la cohorte mínima de 4 en la matriz aun después de los abandonos.
  */
 const ENCUESTADOS_POR_AREA: Record<string, number> = {
-  DESARROLLO_SOFTWARE: 5,
-  QA: 2,
-  DATOS: 2,
+  DESARROLLO_SOFTWARE: 7,
+  QA: 3,
+  DATOS: 3,
   ARQUITECTURA_SOFTWARE: 1,
   INFRAESTRUCTURA_FABRICA: 1,
   GOBIERNO_FABRICA: 1,
-  MESA_AYUDA: 3,
-  REQUERIMIENTOS: 2,
+  MESA_AYUDA: 4,
+  REQUERIMIENTOS: 3,
   ASEGURAMIENTO_PROYECTOS: 2,
-  PMO: 3,
+  PMO: 4,
   AGILE: 1,
   GESTION_SERVICIOS: 1,
-  COMERCIAL: 2,
-  PREVENTA: 2,
-  SOPORTE: 2,
+  GLOBAL_CAPACITY: 1,
+  COMERCIAL: 3,
+  PREVENTA: 3,
+  SOPORTE: 3,
+  INFRAESTRUCTURA_ON_PREMISE: 1,
   ATRACCION_TALENTO: 1,
+  PEOPLE_ANALYTICS: 1,
+  APRENDIZAJE_DESARROLLO: 1,
+  COMPENSACION_BENEFICIOS: 1,
   ADMINISTRACION_PERSONAL: 1,
   BIENESTAR_CULTURA: 1,
+  RELACIONES_CORPORATIVAS: 1,
+  COMUNICACION_INTERNA: 1,
   COMPRAS: 1,
+  ADMINISTRATIVO: 1,
   TESORERIA: 1,
   CONTABLE: 1,
   NOMINA: 1,
   FINANCIERA: 1,
   CONTRATACION_PUBLICA: 2,
   LEGAL_PROYECTOS: 1,
+  ASUNTOS_CORPORATIVOS_COMPLIANCE: 1,
   SEGURIDAD_INFORMACION: 1,
+  SEGURIDAD_OFENSIVA: 1,
   SOC: 1,
   DISENO_UX_UI: 1,
+  DISENO_GRAFICO: 1,
+  CONTENT_MARKETING: 1,
   CALIDAD: 1,
   ESTRATEGIA_DIGITAL: 1,
+  REALIZACION_AUDIOVISUAL: 1,
 };
 
 /** Cargos del corte: la pirámide de una empresa de servicios, ancha en la base. */
 const CARGOS: Record<string, number> = {
-  DIRECTOR: 2,
-  GERENTE: 3,
-  HEAD: 4,
-  COORDINADOR: 6,
-  LIDER: 7,
-  PROFESIONAL: 14,
-  ANALISTA: 10,
+  DIRECTOR: 3,
+  GERENTE: 4,
+  HEAD: 6,
+  COORDINADOR: 9,
+  LIDER: 10,
+  PROFESIONAL: 20,
+  ANALISTA: 16,
 };
 
 /** Cuánto sube o baja la nota según el nivel: la brecha jerárquica que el panel busca. */
@@ -279,14 +303,6 @@ const FRECUENCIAS: [string, number][] = [
   ['SEMANAL', 20],
   ['MENSUAL', 10],
   ['ESPORADICA', 6],
-];
-
-const TIEMPOS_RESPUESTA: [string, number][] = [
-  ['SUPERA_ANS', 10],
-  ['CUMPLE_ANS', 36],
-  ['CUMPLE_PARCIAL_ANS', 34],
-  ['NO_CUMPLE_ANS', 12],
-  ['NO_CONOCE_ANS', 8],
 ];
 
 const MOTIVOS_NPS: [string, number][] = [
@@ -628,24 +644,6 @@ function generarUna(
       responder({ questionCode: pregunta.code, valueNumber: valor });
     }
   }
-
-  // C5.1: el ANS acompaña a la percepción de agilidad de la misma persona.
-  const agil = indulgencia + normal(azar) * 0.5;
-  responder({
-    questionCode: 'c5_tiempo_respuesta',
-    valueOption: sortear(
-      azar,
-      TIEMPOS_RESPUESTA.map(([valor, peso]) => {
-        if (valor === 'SUPERA_ANS' || valor === 'CUMPLE_ANS') {
-          return [valor, peso * Math.exp(agil * 0.8)];
-        }
-        if (valor === 'CUMPLE_PARCIAL_ANS' || valor === 'NO_CUMPLE_ANS') {
-          return [valor, peso * Math.exp(-agil * 0.8)];
-        }
-        return [valor, peso];
-      }),
-    ),
-  });
 
   // C8.1 es opcional: unos no la responden, otros marcan «Ninguna».
   const iniciativas = azar();

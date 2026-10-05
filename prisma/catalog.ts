@@ -468,33 +468,12 @@ export const QUESTIONS: QuestionSeed[] = [
   ]),
 
   // --- Componente 5 ---
-  // Desde el 1-oct-2026 se pregunta por el cumplimiento del ANS y no por tramos de horas:
-  // "24 horas" es rápido para una solicitud y lento para otra. Las respuestas anteriores
-  // conservan sus códigos (MENOS_2H…MAS_3_DIAS) y siguen puntuando en el IAG; ver
-  // RESPONSE_TIME_SCORES.
-  {
-    code: 'c5_tiempo_respuesta',
-    componentId: 5,
-    label:
-      'Cuando realiza solicitudes, ¿la respuesta que normalmente recibe cumple el ANS?',
-    helpText:
-      'ANS: acuerdo de nivel de servicio, el tiempo de respuesta pactado. «Supera el ANS» significa que le responden antes de ese tiempo.',
-    type: 'SINGLE',
-    options: [
-      { value: 'SUPERA_ANS', label: 'Supera el ANS' },
-      { value: 'CUMPLE_ANS', label: 'Cumple el ANS' },
-      { value: 'CUMPLE_PARCIAL_ANS', label: 'Cumple parcialmente el ANS' },
-      { value: 'NO_CUMPLE_ANS', label: 'No cumple el ANS' },
-      { value: 'NO_CONOCE_ANS', label: 'No conoce el ANS / No aplica' },
-    ],
-  },
+  // El 5-oct-2026 LinkTIC retiró del instrumento la pregunta del ANS (c5_tiempo_respuesta)
+  // y la escala "Capacidad de respuesta" (c5_capacidad_respuesta). El componente queda en
+  // tres escalas y el IAG pasa a ser su promedio × 10.
   scale('c5_cumplimiento_tiempos', 5, 'Cumplimiento de tiempos', [
     'Nunca se cumplen',
     'Siempre se cumplen',
-  ]),
-  scale('c5_capacidad_respuesta', 5, 'Capacidad de respuesta', [
-    'Respuesta muy lenta',
-    'Respuesta muy ágil',
   ]),
   scale('c5_facilidad_resolver', 5, 'Facilidad para resolver solicitudes', [
     'Muy difícil resolverlas',

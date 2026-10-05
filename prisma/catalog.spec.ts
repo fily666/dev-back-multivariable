@@ -1,5 +1,3 @@
-import { RESPONSE_TIME_SCORES } from '../src/common/constants';
-import { RESPONSE_TIME_ORDER } from '../src/analytics/kpis/distribution.kpi';
 import {
   AREAS,
   COMPONENTS,
@@ -28,12 +26,14 @@ describe('catálogo del instrumento', () => {
   });
 
   it('tiene el número de preguntas que declara el PDF en cada componente', () => {
+    // El C5 es la única excepción al PDF: el 5-oct-2026 LinkTIC retiró dos de sus cinco
+    // preguntas. El resto sale del documento.
     const esperado: Record<number, number> = {
       1: 4,
       2: 5,
       3: 5,
       4: 5,
-      5: 5,
+      5: 3,
       6: 5,
       7: 5,
       8: 5,
@@ -116,19 +116,13 @@ describe('catálogo del instrumento', () => {
     });
   });
 
-  it('el tiempo de respuesta pregunta por el ANS y cada opción tiene su lugar en el panel', () => {
-    const valores = QUESTIONS.find(
-      (q) => q.code === 'c5_tiempo_respuesta',
-    )?.options?.map((o) => o.value);
-
-    // La distribución del panel sigue el mismo orden que ve el encuestado.
-    expect(valores).toEqual([...RESPONSE_TIME_ORDER]);
-
-    // Todas puntúan en el IAG menos "No conoce el ANS / No aplica".
-    const sinScore = (valores ?? []).filter(
-      (valor) => !(valor in RESPONSE_TIME_SCORES),
-    );
-    expect(sinScore).toEqual(['NO_CONOCE_ANS']);
+  it('el componente 5 ya no pregunta por el ANS ni por la capacidad de respuesta', () => {
+    const c5 = QUESTIONS.filter((q) => q.componentId === 5).map((q) => q.code);
+    expect(c5).toEqual([
+      'c5_cumplimiento_tiempos',
+      'c5_facilidad_resolver',
+      'c5_seguimiento',
+    ]);
   });
 
   it('solo el componente 2 y el NPS se evalúan por área', () => {

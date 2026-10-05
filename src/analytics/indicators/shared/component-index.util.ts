@@ -10,8 +10,8 @@ const SCALE_TO_INDEX = 10;
 const INDEX_DECIMALS = 2;
 
 /**
- * Sin este redondeo el ruido binario del punto flotante (0.75 * 75 + 0.25 * 80) viaja
- * hasta el front y dos cortes idénticos pueden no verse iguales.
+ * Sin este redondeo el ruido binario del punto flotante (0.8 * 0.7 * 100 da
+ * 55.99999999999999) viaja hasta el front y dos cortes idénticos pueden no verse iguales.
  */
 export function roundIndex(value: number): number {
   const factor = 10 ** INDEX_DECIMALS;

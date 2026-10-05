@@ -3,15 +3,14 @@ export * from './question-codes.constant';
 export * from './shared/component-index.util';
 export * from './simple-indices';
 export { computeNio } from './nio.indicator';
-export { computeIag } from './iag.indicator';
 export { computeIinn } from './iinn.indicator';
 export { computeNps, computeNpsMotives } from './nps.indicator';
 export { computeImc } from './imc.indicator';
 
-import { computeIag } from './iag.indicator';
 import { computeIinn } from './iinn.indicator';
 import { computeNio } from './nio.indicator';
 import {
+  computeIag,
   computeIcol,
   computeIcom,
   computeIconf,

@@ -26,7 +26,6 @@ import {
 } from './kpis/relationship.kpi';
 import {
   buildInnovationNetwork,
-  buildResponseTimeDistribution,
   countMultiOptions,
   countSingleOptions,
 } from './kpis/distribution.kpi';
@@ -379,7 +378,7 @@ export class AnalyticsService {
     return applyCohort(this.countRespondents(rows), this.minCohortSize, data);
   }
 
-  /** KPI 13 y 17, más los índices por componente para la vista de detalle. */
+  /** KPI 17, más los índices por componente para la vista de detalle. */
   async getComponents(filters: AnalyticsFilters) {
     const [rows, bands, weights] = await Promise.all([
       this.answers.fetchAnswers(
@@ -399,7 +398,6 @@ export class AnalyticsService {
         band: this.thresholds.classifyWith(bands, indicator.value),
       })),
       composite: computeImc(indicators, weights),
-      responseTimes: buildResponseTimeDistribution(rows),
       innovationNetwork: buildInnovationNetwork(rows),
       thresholds: bands,
     });

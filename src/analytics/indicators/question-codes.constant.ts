@@ -32,13 +32,7 @@ export const QUESTION_CODES_BY_INDICATOR: Record<
     'c4_compromisos',
     'c4_valor',
   ],
-  IAG: [
-    'c5_cumplimiento_tiempos',
-    'c5_capacidad_respuesta',
-    'c5_facilidad_resolver',
-    'c5_seguimiento',
-    'c5_tiempo_respuesta',
-  ],
+  IAG: ['c5_cumplimiento_tiempos', 'c5_facilidad_resolver', 'c5_seguimiento'],
   IINT: [
     'c6_impacto',
     'c6_roles',
@@ -61,10 +55,6 @@ export const QUESTION_CODES_BY_INDICATOR: Record<
     'c8_areas_iniciativas',
   ],
 };
-
-/** Los 4 ítems de escala del C5; el 5.º código de IAG es la opción de tiempo. */
-export const IAG_SCALE_CODES = QUESTION_CODES_BY_INDICATOR.IAG.slice(0, 4);
-export const IAG_TIME_CODE = 'c5_tiempo_respuesta';
 
 /** Los 4 ítems de escala del C8; el 5.º código de IINN es la multi de iniciativas. */
 export const IINN_SCALE_CODES = QUESTION_CODES_BY_INDICATOR.IINN.slice(0, 4);
