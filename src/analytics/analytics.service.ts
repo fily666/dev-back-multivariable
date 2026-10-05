@@ -15,6 +15,7 @@ import {
   computeImc,
   computeNps,
   computeNpsMotives,
+  median,
 } from './indicators';
 import {
   RELATIONSHIP_QUESTION_CODES,
@@ -29,6 +30,7 @@ import {
   countMultiOptions,
   countSingleOptions,
 } from './kpis/distribution.kpi';
+import { buildMonitoring } from './kpis/monitoring.kpi';
 import type {
   AnalyticsEnvelope,
   RawAnswerRow,
@@ -36,6 +38,7 @@ import type {
 import type {
   AnalyticsFilters,
   IndicatorsPayload,
+  MonitoringPayload,
   OverviewCards,
   QualitativePayload,
   RadarPoint,
@@ -455,6 +458,41 @@ export class AnalyticsService {
     });
   }
 
+  /** Monitoreo de participación en vivo: conteos y tiempos, refrescado cada 15 s por el panel. */
+  async getMonitoring(
+    filters: AnalyticsFilters,
+  ): Promise<AnalyticsEnvelope<MonitoringPayload>> {
+    const [rows, components, areas, population] = await Promise.all([
+      this.responses.fetchMonitoringRows(filters),
+      this.responses.fetchComponents(),
+      this.responses.fetchAreas(),
+      this.responses.fetchPopulation(),
+    ]);
+
+    // Un solo `now` para el cálculo y para `generatedAt`: "hoy" y "activos ahora" deben
+    // referirse al mismo instante que el panel muestra como hora de corte.
+    const now = new Date();
+    const data = buildMonitoring({ rows, components, areas, population, now });
+
+    // Sin applyCohort, a propósito. La regla de cohorte protege QUÉ respondió alguien, no
+    // QUE respondió: aquí solo hay conteos y tiempos, nunca opiniones. Suprimirlo dejaría el
+    // monitoreo en blanco justo cuando más se necesita: con las primeras respuestas.
+    //
+    // Ojo con lo que sí cambia: el listado de /admin/responses pasa por la cohorte, así que
+    // con menos de MIN_COHORT_SIZE completas oculta área y cargo, y este endpoint los cuenta
+    // igual (p. ej. «1 completa de Legal»). Es participación, no contenido, pero si la
+    // organización decide que también eso debe esperar a la cohorte, el corte va aquí.
+    return {
+      data,
+      meta: {
+        n: data.totals.completed,
+        insufficient: false,
+        minCohortSize: this.minCohortSize,
+        generatedAt: now.toISOString(),
+      },
+    };
+  }
+
   async updateTheme(answerId: string, theme: string | null) {
     return this.answers.updateTheme(BigInt(answerId), theme?.trim() || null);
   }
@@ -473,14 +511,4 @@ function toCountedOptions(
       share: total === 0 ? 0 : Math.round((count / total) * 1000) / 10,
     }))
     .sort((a, b) => b.count - a.count);
-}
-
-/** Mediana y no promedio: un encuestado que dejó la pestaña abierta no debe mover el dato. */
-function median(values: number[]): number | null {
-  if (values.length === 0) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? Math.round((sorted[middle - 1] + sorted[middle]) / 2)
-    : sorted[middle];
 }

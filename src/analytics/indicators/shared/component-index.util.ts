@@ -24,6 +24,19 @@ export function averageOf(values: number[]): number | null {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+/**
+ * Mediana y no promedio: un encuestado que dejó la pestaña abierta no debe mover el dato.
+ * La usan las tarjetas superiores y el monitoreo, que deben mostrar la misma cifra.
+ */
+export function median(values: number[]): number | null {
+  if (values.length === 0) return null;
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 0
+    ? Math.round((sorted[middle - 1] + sorted[middle]) / 2)
+    : sorted[middle];
+}
+
 /** Lleva un promedio de la escala 0-10 al índice 0-100. */
 export function toIndex(scaleAverage: number | null): number | null {
   return scaleAverage === null

@@ -72,6 +72,12 @@ export class AnalyticsController {
     return this.analytics.getAreaDetail(code, filters);
   }
 
+  /** Participación en vivo. No pasa por la cohorte mínima: ver getMonitoring. */
+  @Get('monitoring')
+  getMonitoring(@Query() filters: AnalyticsFiltersDto) {
+    return this.analytics.getMonitoring(filters);
+  }
+
   @Get('responses')
   getResponses(@Query() query: PaginatedFiltersDto) {
     const { page = 1, pageSize = 50, ...filters } = query;

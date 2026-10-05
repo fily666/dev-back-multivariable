@@ -50,7 +50,7 @@ sin duplicar nada.
 | `npm run build` | `nest build` → `dist/` |
 | `npm run typecheck` | `tsc --noEmit` en **los tres** ámbitos: app, seed y `api/` |
 | `npm run lint` | ESLint con `--fix` sobre `src/` y `prisma/` |
-| `npm test` | Jest — 145 tests, sin base de datos |
+| `npm test` | Jest — 182 tests, sin base de datos |
 | `npm run test:cov` | Cobertura en `coverage/` |
 | `npm run prisma:generate` | Regenera el cliente |
 | `npm run prisma:deploy` | `prisma migrate deploy` |
@@ -74,7 +74,7 @@ src/
 │   └── rules/           8 reglas de validación del instrumento
 ├── analytics/           el panel
 │   ├── indicators/      10 índices + IMC compuesto + NPS (funciones puras)
-│   ├── kpis/            distribuciones y mapa de relacionamiento
+│   ├── kpis/            distribuciones, mapa de relacionamiento y monitoreo
 │   ├── repositories/    acceso a datos, separado del cálculo
 │   ├── cohort.util.ts   regla de anonimato
 │   ├── thresholds.service.ts / weights.service.ts
@@ -89,7 +89,7 @@ src/
 un número. No conocen Prisma, ni la regla de cohorte, ni los umbrales
 ([indicator.types.ts](src/analytics/indicators/indicator.types.ts)). Por eso se pueden
 validar las fórmulas del instrumento sin levantar una base de datos, que es lo que hacen los
-43 tests de `indicators.spec.ts`.
+45 tests de `indicators.spec.ts`.
 
 **La regla de cohorte mínima vive en el orquestador, no en los indicadores.**
 [`applyCohort`](src/analytics/cohort.util.ts) envuelve toda respuesta analítica y vacía
@@ -146,6 +146,7 @@ diferencia de latencia.
 | `GET` | `/admin/indices-by-area` | Índices desglosados por área |
 | `GET` | `/admin/qualitative` | Respuestas abiertas, agrupables por tema |
 | `GET` | `/admin/areas/:code` | Detalle de un área |
+| `GET` | `/admin/monitoring` | Participación en vivo: totales, serie diaria, mapa de calor día × hora, embudo por componente, abandono, duraciones, por área y por cargo. Solo honra `campaignId`; **sin cohorte mínima** |
 | `GET` | `/admin/responses` | Listado paginado (`page`, `pageSize` ≤ 200) |
 | `GET` | `/admin/weights` | Pesos del IMC |
 | `PUT` | `/admin/weights` | Actualiza los pesos — **auditado** |
@@ -172,6 +173,11 @@ diferencia de latencia.
   }
 }
 ```
+
+La única excepción es `/admin/monitoring`, que devuelve siempre `insufficient: false`.
+Reporta participación —conteos y tiempos—, nunca opiniones: la regla de cohorte protege
+*qué* respondió alguien, no *que* respondió. Suprimirlo lo dejaría en blanco justo con las
+primeras respuestas, cuando más se necesita. Sus días y horas se cortan en `America/Bogota`.
 
 Se audita lo que cambia datos o los saca del sistema: los pesos del IMC porque alteran el KPI
 titular de la organización, y las exportaciones porque son datos de percepción de personas
@@ -240,15 +246,16 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 
 ## Tests
 
-145 tests en 8 suites, **sin base de datos** — corren en ~2 s:
+182 tests en 9 suites, **sin base de datos** — corren en ~2 s:
 
 | Suite | Tests | Qué cubre |
 |---|---|---|
-| `analytics/indicators/indicators.spec.ts` | 43 | Las fórmulas de los indicadores, **con cada valor esperado calculado a mano** en un comentario junto al test |
-| `responses/rules/rules.spec.ts` | 36 | Las 8 reglas de validación del instrumento |
-| `analytics/kpis/kpis.spec.ts` | 20 | Distribuciones y mapa de relacionamiento |
+| `analytics/indicators/indicators.spec.ts` | 45 | Las fórmulas de los indicadores, **con cada valor esperado calculado a mano** en un comentario junto al test |
+| `responses/rules/rules.spec.ts` | 39 | Las 8 reglas de validación del instrumento |
+| `analytics/kpis/monitoring.spec.ts` | 22 | El monitoreo: cortes por día y hora de Bogotá, serie con ceros y tope de 120 días, embudo, abandono, tramos de duración |
+| `analytics/kpis/kpis.spec.ts` | 21 | Distribuciones y mapa de relacionamiento |
+| `prisma/catalog.spec.ts` | 21 | La transcripción del PDF: los conteos por componente salen del documento, no del código |
 | `export/csv-cell.util.spec.ts` | 12 | Neutralización de fórmulas en las exportaciones |
-| `prisma/catalog.spec.ts` | 12 | La transcripción del PDF: los conteos por componente salen del documento, no del código |
 | `auth/auth.service.spec.ts` | 10 | Login por token, incluida la comparación de tiempo constante |
 | `analytics/cohort.util.spec.ts` | 7 | La regla de cohorte mínima |
 | `survey/survey.service.spec.ts` | 5 | Resolución del catálogo |
@@ -295,4 +302,4 @@ npm run typecheck && npm run lint && npm test && npm run build
 npx prisma validate
 ```
 
-Estado al 14-sep-2026: los cinco pasan — 152/152 tests, schema válido.
+Estado al 5-oct-2026: los cinco pasan — 182/182 tests, schema válido.
