@@ -25,7 +25,7 @@ cp .env.example .env
 npx prisma generate          # cliente tipado en src/generated/prisma
 npx prisma migrate deploy    # crea las 11 tablas y aplica el árbol de procesos
 npx prisma db seed           # siembra el catálogo del instrumento
-npm run prisma:simulacion    # opcional: 46 respuestas simuladas para ver el panel
+npm run prisma:simulacion    # opcional: 68 respuestas simuladas para ver el panel
 
 npm run start:dev            # http://localhost:3001/api/v1
 ```
@@ -42,13 +42,18 @@ idempotente:** se puede volver a correr sin duplicar nada, y desactiva —sin bo
 
 ### Respuestas simuladas
 
-`npm run prisma:simulacion` siembra **46 respuestas simuladas** en la campaña abierta, para
-ver el panel con datos antes de la recolección real. Las genera
+`npm run prisma:simulacion` siembra **68 respuestas simuladas** en la campaña abierta —53
+completas y 15 incompletas—, para ver el panel con datos antes de la recolección real. Las genera
 [`prisma/simulacion.ts`](prisma/simulacion.ts) con una semilla fija —dos corridas dan las
 mismas respuestas— y cada una pasa por las mismas reglas que aplica la API antes de
 escribirse. No son ruido uniforme: cada encuestado trae su indulgencia, el cargo mueve la nota
 y cada área tiene su reputación, así que el panel tiene áreas fuertes y débiles, brecha
 jerárquica, dos encuestas a la carrera y una en línea recta para la vista de calidad.
+
+Las incompletas son borradores abandonados en distintos componentes, del 0 (abrió y no
+guardó nada) al 9, con más abandonos en el 2, que se repite por cada área evaluada. Cada uno
+tiene solo las respuestas que la API habría guardado hasta ese paso, y sin identificación si
+nunca guardó uno. Los totales se cambian en `TOTAL_SIMULADAS` e `INCOMPLETAS`.
 
 | Comando | Qué hace |
 |---|---|
@@ -56,11 +61,6 @@ jerárquica, dos encuestas a la carrera y una en línea recta para la vista de c
 | `npm run prisma:simulacion -- --reset` | Respalda en JSON (en la carpeta que contiene a `dev-back`), **borra todas** las respuestas y siembra; borrado y siembra en una sola transacción |
 
 Corre después del seed: las respuestas apuntan por FK a las áreas del catálogo vigente.
-
-Las 46 que hay hoy en la base se sembraron antes de retirar las dos preguntas del componente 5
-(5-oct-2026); a esas respuestas se les borraron las de las preguntas retiradas. Volver a
-correr el script da un corte equivalente, pero no idéntico: el generador ya no sortea esas
-dos preguntas y la secuencia pseudoaleatoria cambia.
 **Antes de abrir la recolección real hay que borrarlas** (`docs/limpiar-datos-de-prueba.sql`).
 
 ---
@@ -75,12 +75,12 @@ dos preguntas y la secuencia pseudoaleatoria cambia.
 | `npm run build` | `nest build` → `dist/` |
 | `npm run typecheck` | `tsc --noEmit` en **los tres** ámbitos: app, seed y `api/` |
 | `npm run lint` | ESLint con `--fix` sobre `src/` y `prisma/` |
-| `npm test` | Jest — 231 tests, sin base de datos |
+| `npm test` | Jest — 236 tests, sin base de datos |
 | `npm run test:cov` | Cobertura en `coverage/` |
 | `npm run prisma:generate` | Regenera el cliente |
 | `npm run prisma:deploy` | `prisma migrate deploy` |
 | `npm run prisma:seed` | `prisma db seed` |
-| `npm run prisma:simulacion` | Siembra las 46 respuestas simuladas (ver arriba) |
+| `npm run prisma:simulacion` | Siembra las 68 respuestas simuladas (ver arriba) |
 
 `typecheck` cubre tres `tsconfig` porque el seed (`tsx`) y el handler de Vercel (`api/`)
 compilan con ajustes distintos a los de la app. Un solo `tsc --noEmit` dejaría fuera los dos.
@@ -283,7 +283,7 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 
 ## Tests
 
-231 tests en 15 suites, **sin base de datos** — corren en ~2 s:
+236 tests en 15 suites, **sin base de datos** — corren en ~2 s:
 
 | Suite | Tests | Qué cubre |
 |---|---|---|
@@ -297,7 +297,7 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 | `analytics/kpis/influence.spec.ts` | 11 | Influencias entre áreas: quién mueve a quién, fuerza 1-3, motricidad y dependencia |
 | `auth/auth.service.spec.ts` | 10 | Login por token, incluida la comparación de tiempo constante |
 | `analytics/kpis/network.spec.ts` | 9 | La red: demanda con ceros, relación principal, frecuencia en orden de escala, tipos sobre encuestados, valor contra fortalecer, áreas aisladas sin auto-aristas |
-| `prisma/simulacion.spec.ts` | 8 | Las respuestas simuladas: pasan las reglas, son reproducibles y dejan cortes que alcanzan la cohorte |
+| `prisma/simulacion.spec.ts` | 13 | Las respuestas simuladas: pasan las reglas, son reproducibles, los borradores se cortan donde se abandonaron y dejan cortes que alcanzan la cohorte |
 | `analytics/kpis/quality.spec.ts` | 7 | Calidad del corte: el límite de 300 s, línea recta con 10 / 9 / una distinta, componentes planos, texto de puros espacios |
 | `analytics/cohort.util.spec.ts` | 7 | La regla de cohorte mínima |
 | `survey/survey.service.spec.ts` | 5 | El catálogo público: opciones de área y gestión resueltas desde el catálogo vivo |
@@ -346,5 +346,5 @@ npm run typecheck && npm run lint && npm test && npm run build
 npx prisma validate
 ```
 
-Estado al 5-oct-2026, tras retirar dos preguntas del componente 5: los cinco pasan —
-231/231 tests, schema válido.
+Estado al 5-oct-2026, tras la siembra de 68 respuestas simuladas: los cinco pasan — 236/236
+tests, schema válido.

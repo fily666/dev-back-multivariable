@@ -113,16 +113,16 @@ async function main() {
         await tx.surveyResponse.create({
           data: {
             campaignId: campaign.id,
-            status: 'COMPLETED',
+            status: respuesta.status,
             draftToken: generateDraftToken(),
             ownArea: respuesta.ownArea,
             respondentRole: respuesta.respondentRole,
             startedAt: respuesta.startedAt,
             submittedAt: respuesta.submittedAt,
             durationSeconds: respuesta.durationSeconds,
-            lastStep: 10,
+            lastStep: respuesta.lastStep,
             createdAt: respuesta.startedAt,
-            updatedAt: respuesta.submittedAt,
+            updatedAt: respuesta.updatedAt,
             answers: {
               createMany: {
                 data: respuesta.answers.map((answer) => ({
@@ -132,7 +132,7 @@ async function main() {
                   valueOption: answer.valueOption ?? null,
                   valueOptions: answer.valueOptions ?? [],
                   valueText: answer.valueText ?? null,
-                  createdAt: respuesta.submittedAt,
+                  createdAt: respuesta.updatedAt,
                 })),
               },
             },
@@ -151,8 +151,11 @@ async function main() {
     );
   }
   const totalAnswers = respuestas.reduce((n, r) => n + r.answers.length, 0);
+  const borradores = respuestas.filter((r) => r.status === 'DRAFT').length;
   console.log(
-    `  ✔ ${respuestas.length} respuestas simuladas en «${campaign.name}» (${totalAnswers} respuestas a preguntas)`,
+    `  ✔ ${respuestas.length} respuestas simuladas en «${campaign.name}»: ` +
+      `${respuestas.length - borradores} completas y ${borradores} incompletas ` +
+      `(${totalAnswers} respuestas a preguntas)`,
   );
 }
 

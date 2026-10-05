@@ -97,7 +97,6 @@ const ENCUESTADOS_POR_AREA: Record<string, number> = {
   CONTENT_MARKETING: 1,
   CALIDAD: 1,
   ESTRATEGIA_DIGITAL: 1,
-  REALIZACION_AUDIOVISUAL: 1,
 };
 
 /** Cargos del corte: la pirámide de una empresa de servicios, ancha en la base. */
@@ -520,6 +519,26 @@ const HORAS: [number, number][] = [
 const A_LA_CARRERA = 2;
 const EN_LINEA_RECTA = 1;
 
+/**
+ * Dónde se queda cada borrador: el id del último componente que guardó. Muchos solo abren la
+ * encuesta (0), y el componente 2 —el que se repite por cada área evaluada— es donde más se
+ * abandona. El resto se reparte hasta el 9; nadie abandona en el 10, que se guarda al enviar.
+ */
+const ABANDONOS: [number, number][] = [
+  [0, 4],
+  [1, 2],
+  [2, 4],
+  [3, 1.5],
+  [4, 1],
+  [5, 1],
+  [6, 1],
+  [7, 0.8],
+  [8, 0.8],
+  [9, 1],
+];
+
+const componenteDe = new Map(QUESTIONS.map((q) => [q.code, q.componentId]));
+
 // ============ GENERADOR ============
 
 const gestionDe = new Map(AREAS.map((area) => [area.code, area.procesoCode]));
@@ -561,6 +580,7 @@ function generarUna(
   indice: number,
   textos: string[],
   calidad: { carrera: boolean; recta: boolean },
+  abandonaEn: number | null,
 ): RespuestaSimulada {
   const answers: IncomingAnswer[] = [];
   const responder = (answer: IncomingAnswer) => answers.push(answer);
@@ -721,15 +741,21 @@ function generarUna(
     ),
   });
 
-  // La abierta es opcional: la responde cerca del 75 %, y nunca quien fue a la carrera.
-  if (!calidad.carrera && textos.length > 0 && azar() < 0.78) {
+  // La abierta es opcional: la responde cerca del 75 %, y nunca quien fue a la carrera ni
+  // quien abandonó antes de llegar al componente 10.
+  if (
+    abandonaEn === null &&
+    !calidad.carrera &&
+    textos.length > 0 &&
+    azar() < 0.78
+  ) {
     responder({ questionCode: 'c10_cambio_unico', valueText: textos.pop()! });
   }
 
   // --- Cuándo y cuánto tardó ---
   const [anio, mes, dia] = sortear(azar, DIAS).split('-').map(Number);
   const hora = sortear(azar, HORAS);
-  const submittedAt = new Date(
+  const momento = new Date(
     Date.UTC(anio, mes - 1, dia, hora + 5, Math.floor(azar() * 60)),
   );
   const durationSeconds = calidad.carrera
@@ -741,17 +767,43 @@ function generarUna(
         ),
       );
 
+  if (abandonaEn === null) {
+    return {
+      status: 'COMPLETED',
+      lastStep: 10,
+      ownArea: propia,
+      respondentRole: cargo,
+      startedAt: new Date(momento.getTime() - durationSeconds * 1000),
+      updatedAt: momento,
+      submittedAt: momento,
+      durationSeconds,
+      answers,
+    };
+  }
+
+  // Un borrador conserva lo que guardó hasta el componente donde se quedó, y su última
+  // señal de vida es ese paso. Quien nunca guardó un paso tampoco dejó su identificación:
+  // viaja con cada paso, no aparte.
+  const transcurrido =
+    abandonaEn === 0
+      ? 20 + Math.floor(azar() * 70)
+      : Math.round((durationSeconds * abandonaEn) / 10);
   return {
-    ownArea: propia,
-    respondentRole: cargo,
-    startedAt: new Date(submittedAt.getTime() - durationSeconds * 1000),
-    submittedAt,
-    durationSeconds,
-    answers,
+    status: 'DRAFT',
+    lastStep: abandonaEn,
+    ownArea: abandonaEn === 0 ? null : propia,
+    respondentRole: abandonaEn === 0 ? null : cargo,
+    startedAt: momento,
+    updatedAt: new Date(momento.getTime() + transcurrido * 1000),
+    submittedAt: null,
+    durationSeconds: null,
+    answers: answers.filter(
+      (answer) => (componenteDe.get(answer.questionCode) ?? 99) <= abandonaEn,
+    ),
   };
 }
 
-/** Las respuestas simuladas, en orden de envío. */
+/** Las respuestas simuladas, completas e incompletas, en orden de última actividad. */
 export function generarRespuestasSimuladas(
   semilla = SEMILLA,
 ): RespuestaSimulada[] {
@@ -775,15 +827,28 @@ export function generarRespuestasSimuladas(
   const recta = new Set(
     marcadas.slice(A_LA_CARRERA, A_LA_CARRERA + EN_LINEA_RECTA),
   );
+  // Los borradores salen de las demás posiciones: los casos de poca calidad se detectan
+  // sobre encuestas enviadas, así que esos siempre llegan al final.
+  const desde = A_LA_CARRERA + EN_LINEA_RECTA;
+  const abandonos = new Map(
+    marcadas
+      .slice(desde, desde + INCOMPLETAS)
+      .map((i) => [i, sortear(azar, ABANDONOS)]),
+  );
 
   return propias
     .map((propia, i) =>
-      generarUna(azar, propia, cargos[i], i, textos, {
-        carrera: carrera.has(i),
-        recta: recta.has(i),
-      }),
+      generarUna(
+        azar,
+        propia,
+        cargos[i],
+        i,
+        textos,
+        { carrera: carrera.has(i), recta: recta.has(i) },
+        abandonos.get(i) ?? null,
+      ),
     )
-    .sort((a, b) => a.submittedAt.getTime() - b.submittedAt.getTime());
+    .sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
 }
 
 // ============ VALIDACIÓN ============
@@ -838,9 +903,10 @@ export function indiceDelCatalogo(): Map<string, CatalogQuestion> {
 }
 
 /**
- * Pasa una respuesta por las reglas que la API aplica al guardar cada paso y por la de
- * completitud que aplica al enviar. Devuelve las infracciones; vacío es una respuesta que
- * la API habría aceptado.
+ * Pasa una respuesta por las reglas que la API aplica al guardar cada paso y, si se envió,
+ * por la de completitud y la identificación que exige al enviar. Un borrador solo tiene que
+ * cumplir las de cada paso: está a medias por definición. Devuelve las infracciones; vacío
+ * es una respuesta que la API habría aceptado.
  */
 export function validarRespuesta(
   respuesta: RespuestaSimulada,
@@ -861,14 +927,37 @@ export function validarRespuesta(
     evaluableAreas,
     maxAreasInteraccion: 5,
   });
-  const faltantes = findMissingAnswers(
-    [...indice.values()],
-    answers,
-    evaluableAreas,
-  ).map((falta) => ({
-    questionCode: falta.questionCode,
-    message: `Falta la respuesta${falta.targetArea ? ` para ${falta.targetArea}` : ''}.`,
-  }));
 
-  return [...infracciones, ...faltantes];
+  // Lo que la API impone por construcción: la identificación viaja con cada paso guardado, y
+  // un borrador no puede tener respuestas de componentes que no guardó.
+  const estructura: { questionCode: string; message: string }[] = [];
+  if (
+    respuesta.lastStep > 0 &&
+    (!respuesta.ownArea || !respuesta.respondentRole)
+  ) {
+    estructura.push({
+      questionCode: 'ownArea',
+      message: 'Guardó pasos sin identificación.',
+    });
+  }
+  for (const answer of answers) {
+    if ((componenteDe.get(answer.questionCode) ?? 99) > respuesta.lastStep) {
+      estructura.push({
+        questionCode: answer.questionCode,
+        message: `Respuesta de un componente posterior al último guardado (${respuesta.lastStep}).`,
+      });
+    }
+  }
+
+  const faltantes =
+    respuesta.status === 'COMPLETED'
+      ? findMissingAnswers([...indice.values()], answers, evaluableAreas).map(
+          (falta) => ({
+            questionCode: falta.questionCode,
+            message: `Falta la respuesta${falta.targetArea ? ` para ${falta.targetArea}` : ''}.`,
+          }),
+        )
+      : [];
+
+  return [...infracciones, ...estructura, ...faltantes];
 }
