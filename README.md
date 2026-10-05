@@ -25,6 +25,7 @@ cp .env.example .env
 npx prisma generate          # cliente tipado en src/generated/prisma
 npx prisma migrate deploy    # crea las 11 tablas y aplica el árbol de procesos
 npx prisma db seed           # siembra el catálogo del instrumento
+npm run prisma:simulacion    # opcional: 46 respuestas simuladas para ver el panel
 
 npm run start:dev            # http://localhost:3001/api/v1
 ```
@@ -33,10 +34,29 @@ npm run start:dev            # http://localhost:3001/api/v1
 6543, `prisma migrate deploy` se queda colgada sin mensaje de error — el detalle completo
 está en [la referencia de variables](../docs/VARIABLES-DE-ENTORNO.md#2-base-de-datos-supabase).
 
-El seed carga las 7 áreas evaluables más `OTRA` (no evaluable), los 9 procesos, los 10
-componentes con su texto introductorio literal del PDF, las 46 preguntas con sus opciones, los
-7 pesos del IMC y las 4 bandas de semaforización. **Es idempotente:** se puede volver a correr
-sin duplicar nada.
+El seed carga las 16 gestiones y sus 53 subprocesos (la distribución del 5-oct-2026), `OTRA`
+(no evaluable), los 10 componentes con su texto introductorio literal del PDF, las 46
+preguntas con sus opciones, los 7 pesos del IMC y las 4 bandas de semaforización. **Es
+idempotente:** se puede volver a correr sin duplicar nada, y desactiva —sin borrarlas— las
+áreas, gestiones y preguntas que salieron del catálogo.
+
+### Respuestas simuladas
+
+`npm run prisma:simulacion` siembra **46 respuestas simuladas** en la campaña abierta, para
+ver el panel con datos antes de la recolección real. Las genera
+[`prisma/simulacion.ts`](prisma/simulacion.ts) con una semilla fija —dos corridas dan las
+mismas respuestas— y cada una pasa por las mismas reglas que aplica la API antes de
+escribirse. No son ruido uniforme: cada encuestado trae su indulgencia, el cargo mueve la nota
+y cada área tiene su reputación, así que el panel tiene áreas fuertes y débiles, brecha
+jerárquica, dos encuestas a la carrera y una en línea recta para la vista de calidad.
+
+| Comando | Qué hace |
+|---|---|
+| `npm run prisma:simulacion` | Siembra solo si la base **no tiene** respuestas |
+| `npm run prisma:simulacion -- --reset` | Respalda en JSON (en la carpeta que contiene a `dev-back`), **borra todas** las respuestas y siembra; borrado y siembra en una sola transacción |
+
+Corre después del seed: las respuestas apuntan por FK a las áreas del catálogo vigente.
+**Antes de abrir la recolección real hay que borrarlas** (`docs/limpiar-datos-de-prueba.sql`).
 
 ---
 
@@ -50,11 +70,12 @@ sin duplicar nada.
 | `npm run build` | `nest build` → `dist/` |
 | `npm run typecheck` | `tsc --noEmit` en **los tres** ámbitos: app, seed y `api/` |
 | `npm run lint` | ESLint con `--fix` sobre `src/` y `prisma/` |
-| `npm test` | Jest — 216 tests, sin base de datos |
+| `npm test` | Jest — 237 tests, sin base de datos |
 | `npm run test:cov` | Cobertura en `coverage/` |
 | `npm run prisma:generate` | Regenera el cliente |
 | `npm run prisma:deploy` | `prisma migrate deploy` |
 | `npm run prisma:seed` | `prisma db seed` |
+| `npm run prisma:simulacion` | Siembra las 46 respuestas simuladas (ver arriba) |
 
 `typecheck` cubre tres `tsconfig` porque el seed (`tsx`) y el handler de Vercel (`api/`)
 compilan con ajustes distintos a los de la app. Un solo `tsc --noEmit` dejaría fuera los dos.
@@ -109,7 +130,7 @@ así que **añadir una pregunta al instrumento no obliga a tocar código de vali
 
 | Método | Ruta | Qué hace |
 |---|---|---|
-| `GET` | `/survey/schema` | Catálogo completo: campaña, áreas (con su `procesoCode`), las 12 gestiones, los 7 cargos, 10 componentes con sus preguntas y opciones ya resueltas —las de área traen su gestión en `option.group`— y `settings` (`maxAreasInteraccion`). Es lo que dirige el wizard. |
+| `GET` | `/survey/schema` | Catálogo completo: campaña, áreas (con su `procesoCode`), las 16 gestiones, los 7 cargos, 10 componentes con sus preguntas y opciones ya resueltas —las de área traen su gestión en `option.group`— y `settings` (`maxAreasInteraccion`). Es lo que dirige el wizard. |
 | `POST` | `/responses` | Abre un borrador y devuelve su `draftToken`. Limitado a 10/min por IP. |
 | `GET` | `/responses/:draftToken` | Recupera un borrador para retomarlo. |
 | `PATCH` | `/responses/:draftToken/step/:componentId` | Guarda un paso. Cuerpo: `{ answers: AnswerInputDto[], respondentName?, respondentRole? }`. Aplica las 8 reglas; devuelve **422** con detalle por pregunta si alguna falla. |
@@ -257,7 +278,7 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 
 ## Tests
 
-216 tests en 13 suites, **sin base de datos** — corren en ~2 s:
+237 tests en 15 suites, **sin base de datos** — corren en ~2 s:
 
 | Suite | Tests | Qué cubre |
 |---|---|---|
@@ -265,13 +286,16 @@ TS 6 obliga dos ajustes que el scaffold de NestJS no traía: `rootDir` explícit
 | `responses/rules/rules.spec.ts` | 39 | Las 8 reglas de validación del instrumento |
 | `analytics/kpis/monitoring.spec.ts` | 22 | El monitoreo: cortes por día y hora de Bogotá, serie con ceros y tope de 120 días, embudo, abandono, tramos de duración |
 | `analytics/kpis/kpis.spec.ts` | 21 | Distribuciones y mapa de relacionamiento |
-| `prisma/catalog.spec.ts` | 21 | La transcripción del PDF: los conteos por componente salen del documento, no del código |
+| `prisma/catalog.spec.ts` | 23 | La transcripción del PDF (los conteos por componente salen del documento, no del código) y el organigrama: 16 gestiones, 53 subprocesos, en su orden |
 | `analytics/kpis/items.spec.ts` | 13 | Cada ítem 0-10: media, desviación poblacional, consenso, reparto de notas, índice al que alimenta y orden del instrumento |
 | `export/csv-cell.util.spec.ts` | 12 | Neutralización de fórmulas en las exportaciones |
+| `analytics/kpis/influence.spec.ts` | 11 | Influencias entre áreas: quién mueve a quién, fuerza 1-3, motricidad y dependencia |
 | `auth/auth.service.spec.ts` | 10 | Login por token, incluida la comparación de tiempo constante |
 | `analytics/kpis/network.spec.ts` | 9 | La red: demanda con ceros, relación principal, frecuencia en orden de escala, tipos sobre encuestados, valor contra fortalecer, áreas aisladas sin auto-aristas |
+| `prisma/simulacion.spec.ts` | 8 | Las respuestas simuladas: pasan las reglas, son reproducibles y dejan cortes que alcanzan la cohorte |
 | `analytics/kpis/quality.spec.ts` | 7 | Calidad del corte: el límite de 300 s, línea recta con 10 / 9 / una distinta, componentes planos, texto de puros espacios |
 | `analytics/cohort.util.spec.ts` | 7 | La regla de cohorte mínima |
+| `survey/survey.service.spec.ts` | 5 | El catálogo público: opciones de área y gestión resueltas desde el catálogo vivo |
 | `analytics/kpis/roles.spec.ts` | 5 | Índices por cargo y por nivel, cargos sin declarar fuera, y qué cuenta como suprimido |
 | `survey/survey.service.spec.ts` | 5 | Resolución del catálogo |
 
@@ -317,4 +341,5 @@ npm run typecheck && npm run lint && npm test && npm run build
 npx prisma validate
 ```
 
-Estado al 5-oct-2026: los cinco pasan — 216/216 tests, schema válido.
+Estado al 5-oct-2026, tras la nueva distribución de gestiones: los cinco pasan — 237/237
+tests, schema válido.

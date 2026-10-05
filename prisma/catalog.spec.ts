@@ -189,27 +189,54 @@ describe('catálogo del instrumento', () => {
     expect(new Set(PROCESOS.map((p) => p.code)).size).toBe(PROCESOS.length);
   });
 
-  it('cubre las 12 gestiones del organigrama con sus 24 subprocesos', () => {
+  it('cubre las 16 gestiones del organigrama con sus 53 subprocesos', () => {
     const porGestion = Object.fromEntries(
       PROCESOS.map((p) => [
         p.code,
         AREAS.filter((a) => a.procesoCode === p.code).length,
       ]),
     );
+    // La distribución que LinkTIC definió el 5-oct-2026, en su mismo orden.
     expect(porGestion).toEqual({
-      GERENCIA: 5,
-      TALENTO_HUMANO: 3,
+      TALENTO_HUMANO: 9,
+      SOSTENIBILIDAD_REPUTACION: 3,
+      COMERCIAL: 1,
+      LA_FABRICA: 6,
+      MARKETING: 6,
+      TECNOLOGIA: 2,
       MEJORAMIENTO_CONTINUO: 1,
-      SERVICIOS: 1,
-      COMERCIAL: 2,
-      PROYECTOS: 1,
-      CONTRATACION_PUBLICA: 1,
-      FABRICA_SOFTWARE: 2,
-      MARKETING: 2,
-      ADMIN_FIN_CONTABLE: 3,
-      TI: 2,
-      LEGAL: 1,
+      ADMINISTRATIVO_COMPRAS: 3,
+      CONTABLE_TRIBUTARIA: 2,
+      FINANCIERA: 1,
+      JURIDICA: 4,
+      CIBERSEGURIDAD: 3,
+      PREVENTA: 1,
+      PROYECTOS: 3,
+      COMUNICACIONES: 4,
+      PLANEACION_ESTRATEGICA: 4,
     });
+    expect(Object.keys(porGestion)).toEqual(PROCESOS.map((p) => p.code));
+    expect(AREAS).toHaveLength(53);
+  });
+
+  it('ordena las áreas en una sola secuencia, agrupadas por gestión', () => {
+    expect(AREAS.map((a) => a.sortOrder)).toEqual(
+      AREAS.map((_, index) => index + 1),
+    );
+    const ordenGestiones = AREAS.map((a) => a.procesoCode).filter(
+      (code, index, all) => code !== all[index - 1],
+    );
+    expect(ordenGestiones).toEqual(PROCESOS.map((p) => p.code));
+  });
+
+  it('una gestión y un subproceso solo comparten código si comparten nombre', () => {
+    // El panel traduce códigos con un solo diccionario de áreas y gestiones: si un código
+    // nombrara dos cosas distintas, una de las dos se mostraría con el nombre equivocado.
+    const gestiones = new Map(PROCESOS.map((p) => [p.code, p.name]));
+    const choques = AREAS.filter(
+      (a) => gestiones.has(a.code) && gestiones.get(a.code) !== a.name,
+    ).map((a) => a.code);
+    expect(choques).toEqual([]);
   });
 
   it('el área propia no es una pregunta: se pide en la identificación', () => {

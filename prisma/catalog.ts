@@ -35,188 +35,181 @@ export interface QuestionSeed {
   options?: OptionSeed[];
 }
 
-// ============ GESTIONES (procesos principales) ============
-// El organigrama que LinkTIC confirmó el 14-sep-2026. Una gestión agrupa subprocesos;
-// el subproceso es lo que el encuestado selecciona. Estas gestiones son además el
-// catálogo de las preguntas que el PDF marca como "(Lista)" de procesos.
-export const PROCESOS = [
-  { code: 'GERENCIA', name: 'Gestión de gerencia', sortOrder: 1 },
-  { code: 'TALENTO_HUMANO', name: 'Gestión de talento humano', sortOrder: 2 },
-  {
-    code: 'MEJORAMIENTO_CONTINUO',
-    name: 'Gestión de mejoramiento continuo',
-    sortOrder: 3,
-  },
-  { code: 'SERVICIOS', name: 'Gestión de servicios', sortOrder: 4 },
-  { code: 'COMERCIAL', name: 'Gestión comercial', sortOrder: 5 },
-  { code: 'PROYECTOS', name: 'Gestión de proyectos', sortOrder: 6 },
-  {
-    code: 'CONTRATACION_PUBLICA',
-    name: 'Gestión de contratación pública',
-    sortOrder: 7,
-  },
-  {
-    code: 'FABRICA_SOFTWARE',
-    name: 'Gestión de fábrica de software',
-    sortOrder: 8,
-  },
-  { code: 'MARKETING', name: 'Gestión de marketing', sortOrder: 9 },
-  {
-    code: 'ADMIN_FIN_CONTABLE',
-    name: 'Gestión administrativa, financiera y contable',
-    sortOrder: 10,
-  },
-  { code: 'TI', name: 'Gestión TI', sortOrder: 11 },
-  { code: 'LEGAL', name: 'Gestión legal', sortOrder: 12 },
-];
-
-// ============ ÁREAS (subprocesos) ============
-// `sortOrder` es una sola secuencia global para que el catálogo salga ya agrupado por
-// gestión sin que el front tenga que reordenar.
-export const AREAS = [
-  // Gestión de gerencia
-  { code: 'ERP', name: 'ERP', procesoCode: 'GERENCIA', sortOrder: 1 },
-  {
-    code: 'SOSTENIBILIDAD',
-    name: 'Sostenibilidad y relación corporativa',
-    procesoCode: 'GERENCIA',
-    sortOrder: 2,
-  },
-  { code: 'GERENCIA', name: 'Gerencia', procesoCode: 'GERENCIA', sortOrder: 3 },
-  {
-    code: 'PLANEACION_ESTRATEGICA',
-    name: 'Planeación estratégica',
-    procesoCode: 'GERENCIA',
-    sortOrder: 4,
-  },
-  {
-    code: 'SEGURIDAD_INFORMACION',
-    name: 'Seguridad de la información y ciberseguridad',
-    procesoCode: 'GERENCIA',
-    sortOrder: 5,
-  },
-
-  // Gestión de talento humano
-  {
-    code: 'GLOBAL_CAPACITY',
-    name: 'Global capacity',
-    procesoCode: 'TALENTO_HUMANO',
-    sortOrder: 6,
-  },
+// ============ ORGANIGRAMA: GESTIONES Y SUBPROCESOS ============
+// La distribución que LinkTIC definió el 5-oct-2026, que reemplaza a la del 14-sep-2026.
+// Una gestión agrupa subprocesos; el subproceso es lo que el encuestado selecciona. Las
+// gestiones son además el catálogo de las preguntas que el PDF marca como "(Lista)" de
+// procesos.
+//
+// Se declara como árbol para que leerlo sea leer el organigrama. Los nombres son los del
+// documento de LinkTIC con dos ajustes: mayúscula solo inicial, como el resto del
+// instrumento, y las erratas corregidas ("Bussiness", "Estrátegia", "I--nfraestrucutra").
+const ORGANIGRAMA: {
+  code: string;
+  name: string;
+  subprocesos: [code: string, name: string][];
+}[] = [
   {
     code: 'TALENTO_HUMANO',
-    name: 'Gestión de talento humano',
-    procesoCode: 'TALENTO_HUMANO',
-    sortOrder: 7,
+    name: 'Talento humano',
+    subprocesos: [
+      ['ATRACCION_TALENTO', 'Atracción de talento'],
+      ['PEOPLE_ANALYTICS', 'People analytics'],
+      ['APRENDIZAJE_DESARROLLO', 'Aprendizaje y desarrollo'],
+      ['COMPENSACION_BENEFICIOS', 'Compensación y beneficios'],
+      ['ADMINISTRACION_PERSONAL', 'Administración de personal'],
+      ['BIENESTAR_CULTURA', 'Bienestar y cultura'],
+      ['SST', 'Seguridad y salud en el trabajo'],
+      ['RELACIONES_LABORALES', 'Relaciones laborales'],
+      ['BUSINESS_PARTNER', 'Business partner'],
+    ],
   },
   {
-    code: 'SST',
-    name: 'Seguridad y salud en el trabajo',
-    procesoCode: 'TALENTO_HUMANO',
-    sortOrder: 8,
+    code: 'SOSTENIBILIDAD_REPUTACION',
+    name: 'Sostenibilidad y reputación corporativa',
+    subprocesos: [
+      ['RELACIONES_CORPORATIVAS', 'Relaciones corporativas'],
+      ['COMUNICACION_INTERNA', 'Comunicación interna'],
+      [
+        'SOSTENIBILIDAD_RSE',
+        'Sostenibilidad y responsabilidad social empresarial',
+      ],
+    ],
   },
-
-  // Gestión de mejoramiento continuo
-  {
-    code: 'MEJORAMIENTO_CONTINUO',
-    name: 'Mejoramiento continuo',
-    procesoCode: 'MEJORAMIENTO_CONTINUO',
-    sortOrder: 9,
-  },
-
-  // Gestión de servicios
-  {
-    code: 'SERVICIOS',
-    name: 'Gestión de servicios',
-    procesoCode: 'SERVICIOS',
-    sortOrder: 10,
-  },
-
-  // Gestión comercial
   {
     code: 'COMERCIAL',
     name: 'Comercial',
-    procesoCode: 'COMERCIAL',
-    sortOrder: 11,
+    subprocesos: [['COMERCIAL', 'Comercial']],
   },
   {
-    code: 'PREVENTA',
-    name: 'Preventa',
-    procesoCode: 'COMERCIAL',
-    sortOrder: 12,
+    code: 'LA_FABRICA',
+    name: 'La Fábrica',
+    subprocesos: [
+      ['GOBIERNO_FABRICA', 'Gobierno de fábrica'],
+      ['DATOS', 'Datos'],
+      ['ARQUITECTURA_SOFTWARE', 'Arquitectura de software'],
+      ['DESARROLLO_SOFTWARE', 'Desarrollo de software'],
+      ['INFRAESTRUCTURA_FABRICA', 'Infraestructura'],
+      ['QA', 'QA'],
+    ],
   },
-
-  // Gestión de proyectos
-  { code: 'PMO', name: 'PMO', procesoCode: 'PROYECTOS', sortOrder: 13 },
-
-  // Gestión de contratación pública
-  {
-    code: 'CONTRATACION_PUBLICA',
-    name: 'Contratación pública',
-    procesoCode: 'CONTRATACION_PUBLICA',
-    sortOrder: 14,
-  },
-
-  // Gestión de fábrica de software
-  {
-    code: 'FABRICA_SOFTWARE',
-    name: 'Fábrica de software',
-    procesoCode: 'FABRICA_SOFTWARE',
-    sortOrder: 15,
-  },
-  {
-    code: 'INGENIERIA_CLOUD',
-    name: 'Ingeniería cloud',
-    procesoCode: 'FABRICA_SOFTWARE',
-    sortOrder: 16,
-  },
-
-  // Gestión de marketing
   {
     code: 'MARKETING',
     name: 'Marketing',
-    procesoCode: 'MARKETING',
-    sortOrder: 17,
+    subprocesos: [
+      ['DISENO_GRAFICO', 'Diseño gráfico'],
+      [
+        'ESTRATEGIA_MARKETING_PROYECTOS',
+        'Estrategia de marketing para proyectos',
+      ],
+      ['CONTENT_MARKETING', 'Content marketing'],
+      ['DISENO_UX_UI', 'Diseño UX/UI y producto digital'],
+      ['AUTOMATIZACION_BI', 'Automatización y BI'],
+      ['FORMACION', 'Formación'],
+    ],
   },
   {
-    code: 'COMUNICACIONES',
-    name: 'Comunicaciones',
-    procesoCode: 'MARKETING',
-    sortOrder: 18,
-  },
-
-  // Gestión administrativa, financiera y contable
-  {
-    code: 'ADMINISTRATIVA',
-    name: 'Administrativa',
-    procesoCode: 'ADMIN_FIN_CONTABLE',
-    sortOrder: 19,
+    code: 'TECNOLOGIA',
+    name: 'Tecnología',
+    subprocesos: [
+      ['SOPORTE', 'Soporte'],
+      ['INFRAESTRUCTURA_ON_PREMISE', 'Infraestructura on-premise'],
+    ],
   },
   {
-    code: 'CONTABLE',
-    name: 'Contable',
-    procesoCode: 'ADMIN_FIN_CONTABLE',
-    sortOrder: 20,
+    code: 'MEJORAMIENTO_CONTINUO',
+    name: 'Mejoramiento continuo',
+    subprocesos: [['CALIDAD', 'Calidad']],
+  },
+  {
+    code: 'ADMINISTRATIVO_COMPRAS',
+    name: 'Administrativo y compras',
+    subprocesos: [
+      ['COMPRAS', 'Compras'],
+      ['ADMINISTRATIVO', 'Administrativo'],
+      ['TESORERIA', 'Tesorería'],
+    ],
+  },
+  {
+    code: 'CONTABLE_TRIBUTARIA',
+    name: 'Contable y tributaria',
+    subprocesos: [
+      ['CONTABLE', 'Contable'],
+      ['NOMINA', 'Nómina'],
+    ],
   },
   {
     code: 'FINANCIERA',
     name: 'Financiera',
-    procesoCode: 'ADMIN_FIN_CONTABLE',
-    sortOrder: 21,
+    subprocesos: [['FINANCIERA', 'Financiera']],
   },
-
-  // Gestión TI
-  { code: 'SOPORTE_TI', name: 'Soporte TI', procesoCode: 'TI', sortOrder: 22 },
   {
-    code: 'INFRAESTRUCTURA_ON_PREMISE',
-    name: 'Infraestructura on premise',
-    procesoCode: 'TI',
-    sortOrder: 23,
+    code: 'JURIDICA',
+    name: 'Jurídica',
+    subprocesos: [
+      ['CONTRATACION_PUBLICA', 'Contratación pública'],
+      ['LEGAL_PROYECTOS', 'Legal de proyectos'],
+      ['ASUNTOS_CORPORATIVOS_COMPLIANCE', 'Asuntos corporativos y compliance'],
+      ['ASUNTOS_ESTRATEGICOS', 'Asuntos estratégicos'],
+    ],
   },
-
-  // Gestión legal
-  { code: 'LEGAL', name: 'Legal', procesoCode: 'LEGAL', sortOrder: 24 },
+  {
+    code: 'CIBERSEGURIDAD',
+    name: 'Ciberseguridad y seguridad de la información',
+    subprocesos: [
+      ['SEGURIDAD_INFORMACION', 'Seguridad de la información'],
+      ['SEGURIDAD_OFENSIVA', 'Seguridad ofensiva'],
+      ['SOC', 'SOC'],
+    ],
+  },
+  {
+    code: 'PREVENTA',
+    name: 'Preventa',
+    subprocesos: [['PREVENTA', 'Preventa']],
+  },
+  {
+    code: 'PROYECTOS',
+    name: 'Proyectos',
+    subprocesos: [
+      ['REQUERIMIENTOS', 'Requerimientos'],
+      ['MESA_AYUDA', 'Mesa de ayuda'],
+      ['ASEGURAMIENTO_PROYECTOS', 'Aseguramiento de proyectos'],
+    ],
+  },
+  {
+    code: 'COMUNICACIONES',
+    name: 'Comunicaciones',
+    subprocesos: [
+      ['ESTRATEGIA_DIGITAL', 'Estrategia digital de LinkTIC'],
+      ['VOZ_COMPARTIDA', 'Voz compartida'],
+      ['GOBIERNO_COMPONENTE_POLITICO', 'Gobierno y componente político'],
+      ['REALIZACION_AUDIOVISUAL', 'Realización audiovisual'],
+    ],
+  },
+  {
+    code: 'PLANEACION_ESTRATEGICA',
+    name: 'Planeación estratégica',
+    subprocesos: [
+      ['GESTION_SERVICIOS', 'Gestión de servicios'],
+      ['PMO', 'PMO'],
+      ['AGILE', 'Agile'],
+      ['GLOBAL_CAPACITY', 'Global capacity'],
+    ],
+  },
 ];
+
+export const PROCESOS = ORGANIGRAMA.map(({ code, name }, index) => ({
+  code,
+  name,
+  sortOrder: index + 1,
+}));
+
+// ============ ÁREAS (subprocesos) ============
+// `sortOrder` es una sola secuencia global para que el catálogo salga ya agrupado por
+// gestión sin que el front tenga que reordenar.
+export const AREAS = ORGANIGRAMA.flatMap(({ code: procesoCode, subprocesos }) =>
+  subprocesos.map(([code, name]) => ({ code, name, procesoCode })),
+).map((area, index) => ({ ...area, sortOrder: index + 1 }));
 
 // Centinela para respuestas globales (no por área). Nunca se muestra al encuestado.
 export const SENTINEL_AREA = {
